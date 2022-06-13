@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Data.Entity;
 using Microsoft.AspNetCore.Authorization;
+using EnsuranceProjectEntityLib.Model.Common;
+using System.Diagnostics;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -21,14 +23,16 @@ namespace InsuranceBankWebApiProject.Controllers
     {
         //private readonly AdminRepository _adminRepository=new AdminRepository();
         //private readonly AllRepository<Admin> adminRepo;
-        private readonly UserManager<Admin> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(UserManager<Admin> userManager, IConfiguration configuration) 
+        public AdminController(UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration) 
         {
             // this.adminRepo = new AllRepository<Admin>();
             _userManager = userManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
         [HttpPost]
         [Route("Register")]
@@ -40,18 +44,28 @@ namespace InsuranceBankWebApiProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Already Exists" });
             }
             //var loginIdExists=await 
-            Admin user = new Admin()
+            ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 UserName = model.UserName,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                LoginId=model.LoginId
+                LoginId=model.LoginId,
+                UserStatus="Active"
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Created" });
             }
+            if(! await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            }
+            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+            }
+
             return this.Ok(new Response { Message = "User Created Successfully", Status = "Success" });
         }
 
@@ -59,6 +73,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+            Debug.WriteLine("The Email is : "+model.Email);
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -125,11 +140,11 @@ namespace InsuranceBankWebApiProject.Controllers
 
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpGet]
         [Route("GetAllAdmins")]
         
-        public async Task<List<Admin>> GetAllAdmins()
+        public async Task<List<ApplicationUser>> GetAllAdmins()
         {
             return _userManager.Users.ToList();
         }

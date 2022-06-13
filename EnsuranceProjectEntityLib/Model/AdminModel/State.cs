@@ -12,5 +12,7 @@ namespace EnsuranceProjectEntityLib.Model.AdminModel
         public int Id { get; set; }
         [Required(ErrorMessage = "State is Required")]
         public string StateName { get; set; }
+        [Required(ErrorMessage = "Status is Required")]
+        public string Status { get; set; }
     }
 }

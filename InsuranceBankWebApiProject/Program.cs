@@ -24,7 +24,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddDbContext<BankInsuranceDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDbContextConnectionString")));
 
-builder.Services.AddIdentity<Admin, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BankInsuranceDbContext>()
     .AddDefaultTokenProviders();
 //builder.Services.AddIdentity<CustomerDocument, IdentityRole>()
