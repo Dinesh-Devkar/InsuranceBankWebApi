@@ -1,0 +1,12 @@
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.deps.json
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\bin\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.GeneratedMSBuildEditorConfig.editorconfig
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfoInputs.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfo.cs
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.CoreCompileInputs.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache

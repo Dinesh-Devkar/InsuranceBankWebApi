@@ -1,0 +1,17 @@
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectLib.deps.json
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectLib.runtimeconfig.json
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\ref\EnsuranceProjectLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectLib.pdb
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.GeneratedMSBuildEditorConfig.editorconfig
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.AssemblyInfoInputs.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.AssemblyInfo.cs
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.csproj.CoreCompileInputs.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\ref\EnsuranceProjectLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.pdb
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.genruntimeconfig.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.csproj.AssemblyReference.cache
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.dll
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+D:\SwabhavTranningRepo\NETCore\BankEnsuranceSolution\EnsuranceProjectLib\obj\Debug\net6.0\EnsuranceProjectLib.csproj.CopyComplete

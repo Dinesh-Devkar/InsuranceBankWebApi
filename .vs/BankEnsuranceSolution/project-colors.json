@@ -1,0 +1,31 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "55a41acf-c884-493f-9cc4-1dd5556699b9": {
+      "ProjectGuid": "55a41acf-c884-493f-9cc4-1dd5556699b9",
+      "DisplayName": "ClassLibrary1",
+      "ColorIndex": 0
+    },
+    "7f6d5917-55cf-4411-8b08-a79b668e9c60": {
+      "ProjectGuid": "7f6d5917-55cf-4411-8b08-a79b668e9c60",
+      "DisplayName": "EnsuranceProjectLib",
+      "ColorIndex": 1
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    },
+    "f97c46c8-e0b0-4273-ab8c-a64f92cd0351": {
+      "ProjectGuid": "f97c46c8-e0b0-4273-ab8c-a64f92cd0351",
+      "DisplayName": "InsuranceBankWebApiProject",
+      "ColorIndex": 2
+    },
+    "229dc894-eb26-46d0-b218-3660b6934b44": {
+      "ProjectGuid": "229dc894-eb26-46d0-b218-3660b6934b44",
+      "DisplayName": "EnsuranceProjectEntityLib",
+      "ColorIndex": 3
+    }
+  },
+  "NextColorIndex": 4
+}
