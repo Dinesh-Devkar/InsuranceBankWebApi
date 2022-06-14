@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    partial class BankInsuranceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220614174828_Update-Database")]
+    partial class UpdateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,10 +198,6 @@ namespace EnsuranceProjectLib.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("InsurancePlanName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("InsuranceScheme")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -214,7 +212,7 @@ namespace EnsuranceProjectLib.Migrations
                     b.Property<int>("MaximumInvestAmt")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaximumYears")
+                    b.Property<int>("MaximumYear")
                         .HasColumnType("int");
 
                     b.Property<int>("MinimumAge")
