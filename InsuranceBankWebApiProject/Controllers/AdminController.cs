@@ -100,12 +100,10 @@ namespace InsuranceBankWebApiProject.Controllers
                 }
                 var authSignInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var token = new JwtSecurityToken(
-                    issuer:
-             _configuration["Jwt:ValidIssuer"],
-                    audience:
-              _configuration["Jwt:ValidAudience"],
-             claims:authClaims,    //null original value
-             expires: DateTime.Now.AddMinutes(120),
+                    issuer:_configuration["Jwt:ValidIssuer"],
+                    audience:_configuration["Jwt:ValidAudience"],
+                    claims:authClaims,    //null original value
+                    expires: DateTime.Now.AddMinutes(120),
 
              //notBefore:
              signingCredentials: new SigningCredentials(authSignInKey, SecurityAlgorithms.HmacSha256));
@@ -181,7 +179,7 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
-            _stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
+            await _stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
             return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
         }
 
@@ -204,7 +202,7 @@ namespace InsuranceBankWebApiProject.Controllers
                 if(model.Status=="Active" || model.Status == "InActive")
                 {
                     isStateExist.Status=model.Status;
-                    _stateManager.Update(isStateExist);
+                    await _stateManager.Update(isStateExist);
                     return this.Ok(new Response { Message = "State Updated Successfully", Status = "Success" });
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid State Status" });
@@ -241,7 +239,7 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
-            _cityManager.Add(new City() { CityName = model.CityName, Status = model.Status });
+            await _cityManager.Add(new City() { CityName = model.CityName, Status = model.Status,State=model.State });
             return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
         }
 
@@ -264,7 +262,8 @@ namespace InsuranceBankWebApiProject.Controllers
                 if (model.Status == "Active" || model.Status == "InActive")
                 {
                     city.Status = model.Status;
-                    _cityManager.Update(city);
+                    city.State= model.State;
+                    await _cityManager.Update(city);
                     return this.Ok(new Response { Message = "City Updated Successfully", Status = "Success" });
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid City Status" });

@@ -14,5 +14,7 @@ namespace EnsuranceProjectEntityLib.Model.AdminModel
         public string CityName { get; set; }
         [Required(ErrorMessage = "Status is Required")]
         public string Status { get; set; }
+        [Required(ErrorMessage = "State is Required")]
+        public string State { get; set; }
     }
 }
