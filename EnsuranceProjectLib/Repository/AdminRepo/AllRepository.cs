@@ -15,41 +15,28 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
         private readonly BankInsuranceDbContext _bankDb;
         private DbSet<T> _dbEntity;
 
-        public AllRepository()
+        public AllRepository(BankInsuranceDbContext bankInsuranceDb)
         {
-            //_bankDb = new BankInsuranceDbContext();
+            _bankDb = bankInsuranceDb;
             _dbEntity = _bankDb.Set<T>();
         }
-        //public async Task<string> AddAdmin(AdminAddDto admin)
-        //{
-        //    if (admin != null)
-        //    {
-        //        await this._bankDb.Admins.AddAsync(new Admin()
-        //        {
-        //            Name = admin.Name,
-        //            DateOfBirth = admin.DateOfBirth,
-        //            MobileNumber = admin.MobileNumber,
-        //            LoginId = admin.LoginId,
-        //            Password = admin.Password,
-        //        });
-        //        if (await this._bankDb.SaveChangesAsync() > 0)
-        //        {
-        //            return "Admin Added Successfully";
-        //        }
-        //    }
-        //    return "Something Went Wrong User Not Added";
-        //}
-        public void Add(T entity)
+       
+        public async Task Add(T entity)
         {
-            _dbEntity.Add(entity);
-            //_bankDb.Admins.Add(entity);
-            _bankDb.SaveChanges();
+            await _dbEntity.AddAsync(entity);
+            _bankDb.SaveChangesAsync();
 
         }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public List<T> GetAll()
         {
-            return _dbEntity.ToList();
+            return  _dbEntity.ToList();
+        }
+
+        public async Task Update(T entity)
+        {
+           _dbEntity.Update(entity);           
+           await _bankDb.SaveChangesAsync();
         }
     }
 }

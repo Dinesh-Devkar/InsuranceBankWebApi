@@ -2,11 +2,11 @@
 
 namespace InsuranceBankWebApiProject.DtoClasses.Common
 {
-    public class LoginModel
+    public class StateAddDto
     {
         
-        public string Email { get; set; }
+        public string StateName { get; set; }
         
-        public string Password { get; set; }
+        public string Status { get; set; }
     }
 }

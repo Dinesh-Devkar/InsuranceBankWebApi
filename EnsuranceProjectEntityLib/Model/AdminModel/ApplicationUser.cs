@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace EnsuranceProjectEntityLib.Model.AdminModel
 {
-    public class Admin:IdentityUser
-    {
-        public string LoginId { get; set; }
-    }
+    //public class ApplicationUser:IdentityUser
+    //{
+    //    public string LoginId { get; set; }
+    //}
 }
