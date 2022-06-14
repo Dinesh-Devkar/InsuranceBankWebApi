@@ -21,15 +21,22 @@ namespace InsuranceBankWebApiProject.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        //private readonly AdminRepository _adminRepository=new AdminRepository();
-        //private readonly AllRepository<Admin> adminRepo;
+        private readonly AllRepository<City> _cityManager;
+        private readonly AllRepository<State> _stateManager;
+        private readonly BankInsuranceDbContext _bankInsuranceDbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration) 
+        
+        
+
+        public AdminController(UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration, BankInsuranceDbContext bankInsuranceDb) 
         {
             // this.adminRepo = new AllRepository<Admin>();
+            _stateManager = new AllRepository<State>(bankInsuranceDb);
+            _cityManager = new AllRepository<City>(bankInsuranceDb);
+            _bankInsuranceDbContext = bankInsuranceDb;
             _userManager = userManager;
             _configuration = configuration;
             _roleManager = roleManager;
@@ -146,23 +153,134 @@ namespace InsuranceBankWebApiProject.Controllers
         
         public async Task<List<ApplicationUser>> GetAllAdmins()
         {
+            
             return _userManager.Users.ToList();
+           
         }
-        //[HttpPost]
-        //[Route("AddAdmin")]
-        //public async Task<IActionResult> AddAdmin(Admin admin)
-        //{
-        //    adminRepo.Add(admin);
+        
+        [HttpPost]
+        [Route("AddState")]
+        public async Task<IActionResult> AddState([FromBody] StateAddDto model)
+        {
+            Debug.WriteLine("Inside Add State");
+            if (!ModelState.IsValid)
+            {
+                Debug.WriteLine("Inside Model State");
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+            }
+            if (model.StateName.Length == 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+            }
+            Debug.WriteLine("Outside IF Condition");
+            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+            var isStateExist = _stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
+            if (isStateExist!=null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "State Already Exists" });
+            }
+            //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
+            //_bankInsuranceDbContext.SaveChanges();
+            _stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
+            return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
+        }
 
-        //    return this.Ok("Admin Added Successfully");
-        //}
 
-        //[HttpGet]
-        //[Route("GetAllAdmins")]
-        //public async Task<IEnumerable<Admin>> GetAllAdmins()
-        //{
-        //    return await adminRepo.GetAll();
-        //}
+        [HttpPut]
+        [Route("UpdateState")]
+        public async Task<IActionResult> UpdateState([FromBody] StateAddDto model)
+        {
+            Debug.WriteLine("Inside Add State");
+            if (!ModelState.IsValid)
+            {
+                Debug.WriteLine("Inside Model State");
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+            }
+            Debug.WriteLine("Outside IF Condition");
+            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+            var isStateExist = _stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
+            if (isStateExist != null)
+            {
+                if(model.Status=="Active" || model.Status == "InActive")
+                {
+                    isStateExist.Status=model.Status;
+                    _stateManager.Update(isStateExist);
+                    return this.Ok(new Response { Message = "State Updated Successfully", Status = "Success" });
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid State Status" });
+
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "State Not Found" });
+
+
+        }
+
+        [HttpGet]
+        [Route("GetAllStates")]
+        public async Task<List<State>> GetAllStates()
+        {
+            return _stateManager.GetAll();
+        }
+
+        [HttpPost]
+        [Route("AddCity")]
+        public async Task<IActionResult> AddCity([FromBody] CityAddDto model)
+        {
+            Debug.WriteLine("Inside Add State");
+            if (!ModelState.IsValid)
+            {
+                Debug.WriteLine("Inside Model State");
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+            }
+            Debug.WriteLine("Outside IF Condition");
+            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+            var city = _cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
+            if (city != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "City Already Exists" });
+            }
+            //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
+            //_bankInsuranceDbContext.SaveChanges();
+            _cityManager.Add(new City() { CityName = model.CityName, Status = model.Status });
+            return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
+        }
+
+
+        [HttpPut]
+        [Route("UpdateCity")]
+        public async Task<IActionResult> UpdateCity([FromBody] CityAddDto model)
+        {
+            Debug.WriteLine("Inside Add State");
+            if (!ModelState.IsValid)
+            {
+                Debug.WriteLine("Inside Model State");
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+            }
+            Debug.WriteLine("Outside IF Condition");
+            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+            var city = _cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
+            if (city != null)
+            {
+                if (model.Status == "Active" || model.Status == "InActive")
+                {
+                    city.Status = model.Status;
+                    _cityManager.Update(city);
+                    return this.Ok(new Response { Message = "City Updated Successfully", Status = "Success" });
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid City Status" });
+
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "City Not Found" });
+
+
+        }
+
+        [HttpGet]
+        [Route("GetAllCities")]
+        public async Task<List<City>> GetAllCities()
+        {
+            return _cityManager.GetAll();
+        }
 
     }
 }

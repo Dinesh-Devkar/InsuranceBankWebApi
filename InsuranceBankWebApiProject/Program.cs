@@ -21,15 +21,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
+builder.Services.AddTransient<IBankInsuranceDbContext, BankInsuranceDbContext>();
 builder.Services.AddDbContext<BankInsuranceDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDbContextConnectionString")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BankInsuranceDbContext>()
     .AddDefaultTokenProviders();
-//builder.Services.AddIdentity<CustomerDocument, IdentityRole>()
-//    .AddEntityFrameworkStores<BankInsuranceDbContext>()
-//    .AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,6 +46,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();

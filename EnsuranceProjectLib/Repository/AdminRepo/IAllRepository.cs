@@ -8,7 +8,9 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
 {
     public interface IAllRepository<T> where T : class
     {
-        void Add(T entity);
-        Task<IEnumerable<T>> GetAll();
+        Task Add(T entity);
+        List<T> GetAll();
+        Task Update(T entity);
+
     }
 }

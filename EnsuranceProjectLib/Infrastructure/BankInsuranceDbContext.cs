@@ -26,9 +26,9 @@ namespace EnsuranceProjectLib.Infrastructure
     //        optionsBuilder.UseSqlServer(@"server=.\sqlexpress;database=BankInsurance;trusted_connection=true");
     //    }
     //}
-    public class BankInsuranceDbContext : IdentityDbContext<EnsuranceProjectEntityLib.Model.Common.ApplicationUser>
+    public class BankInsuranceDbContext : IdentityDbContext<EnsuranceProjectEntityLib.Model.Common.ApplicationUser>,IBankInsuranceDbContext
     {
-       
+
         public BankInsuranceDbContext(DbContextOptions<BankInsuranceDbContext> options):base(options)
         { }
 
@@ -45,5 +45,6 @@ namespace EnsuranceProjectLib.Infrastructure
         {
             base.OnModelCreating(builder);
         }
+        
     }
 }
