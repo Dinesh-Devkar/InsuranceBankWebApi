@@ -34,6 +34,7 @@ namespace EnsuranceProjectLib.Infrastructure
         { }
 
         public DbSet<ApplicationUser> Admins { get; set; }
+        //public DbSet<ApplicationUser> Employees { get; set; }
         //public DbSet<Customer> Customers { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<State> States { get; set; }

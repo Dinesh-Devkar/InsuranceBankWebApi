@@ -13,8 +13,8 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
         [Required(ErrorMessage = "Minimum Year Is Required")]
         public int MinimumYears { get; set; }
         [Required(ErrorMessage = "Maximun Is Required")]
-        public int MaximumYear { get; set; }
-        [Required(ErrorMessage = "Minimum Age Is Required")]
+        public int MaximumYears { get; set; }
+        [Required(ErrorMessage = "Minimum Age Is Requireds")]
         public int MinimumAge { get; set; }
         [Required(ErrorMessage = "Maximum Year Is Required")]
         public int MaximumAge { get; set; }
