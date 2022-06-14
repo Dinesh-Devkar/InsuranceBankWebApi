@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    partial class BankInsuranceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220614110220_AddedInsuranceTypeTable")]
+    partial class AddedInsuranceTypeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,41 +188,6 @@ namespace EnsuranceProjectLib.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.ToTable("CustomersDocuments");
-                });
-
-            modelBuilder.Entity("EnsuranceProjectEntityLib.Model.Insurance.InsuranceScheme", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int>("InstallmentComission")
-                        .HasColumnType("int");
-
-                    b.Property<string>("InsuranceSchemeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InsuranceTypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("NewRegComission")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InsuranceSchemes");
                 });
 
             modelBuilder.Entity("EnsuranceProjectEntityLib.Model.Insurance.InsuranceType", b =>

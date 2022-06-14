@@ -2,6 +2,7 @@
 using EnsuranceProjectEntityLib.Model.AdminModel;
 using EnsuranceProjectEntityLib.Model.Common;
 using EnsuranceProjectEntityLib.Model.CustomerModel;
+using EnsuranceProjectEntityLib.Model.Insurance;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,8 @@ namespace EnsuranceProjectLib.Infrastructure
         public DbSet<City> Cities { get; set; }
         public DbSet<State> States { get; set; }
         public DbSet<CustomerDocument> CustomersDocuments { get; set; }
+        public DbSet<InsuranceType> InsuranceTypes { get; set; }
+        public DbSet<InsuranceScheme> InsuranceSchemes { get; set; }
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer(@"server=.\sqlexpress;database=BankInsurance;trusted_connection=true");
