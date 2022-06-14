@@ -22,6 +22,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddTransient<IBankInsuranceDbContext, BankInsuranceDbContext>();
+builder.Services.AddTransient(typeof(IAllRepository<>), typeof(AllRepository<>));
 builder.Services.AddDbContext<BankInsuranceDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDbContextConnectionString")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

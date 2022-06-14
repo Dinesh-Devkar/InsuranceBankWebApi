@@ -30,6 +30,7 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
 
         public List<T> GetAll()
         {
+            
             return  _dbEntity.ToList();
         }
 

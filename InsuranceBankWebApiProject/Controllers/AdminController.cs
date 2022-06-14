@@ -14,15 +14,20 @@ using System.Data.Entity;
 using Microsoft.AspNetCore.Authorization;
 using EnsuranceProjectEntityLib.Model.Common;
 using System.Diagnostics;
+using EnsuranceProjectEntityLib.Model.Insurance;
+using InsuranceBankWebApiProject.DtoClasses.Insurance;
+using System.Drawing;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly AllRepository<City> _cityManager;
-        private readonly AllRepository<State> _stateManager;
+        private readonly IAllRepository<City> _cityManager;
+        private readonly IAllRepository<InsuranceScheme> _insuranceSchemeManager;
+        private readonly IAllRepository<State> _stateManager;
+        private readonly IAllRepository<InsuranceType> _insuranceTypeManager;
         private readonly BankInsuranceDbContext _bankInsuranceDbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
@@ -33,19 +38,21 @@ namespace InsuranceBankWebApiProject.Controllers
 
         public AdminController(UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration, BankInsuranceDbContext bankInsuranceDb) 
         {
-            // this.adminRepo = new AllRepository<Admin>();
-            _stateManager = new AllRepository<State>(bankInsuranceDb);
-            _cityManager = new AllRepository<City>(bankInsuranceDb);
-            _bankInsuranceDbContext = bankInsuranceDb;
-            _userManager = userManager;
-            _configuration = configuration;
-            _roleManager = roleManager;
+            
+            this._stateManager = new AllRepository<State>(bankInsuranceDb);
+            this._cityManager = new AllRepository<City>(bankInsuranceDb);
+            this._insuranceTypeManager= new AllRepository<InsuranceType>(bankInsuranceDb);
+            this._insuranceSchemeManager= new AllRepository<InsuranceScheme>(bankInsuranceDb);
+            this._bankInsuranceDbContext = bankInsuranceDb;
+            this._userManager = userManager;
+            this._configuration = configuration;
+            this._roleManager = roleManager;
         }
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> Register([FromBody]AdminAddDto model)
         {
-            var userExist = await _userManager.FindByEmailAsync(model.Email);
+            var userExist = await this._userManager.FindByEmailAsync(model.Email);
             if (userExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Already Exists" });
@@ -59,18 +66,18 @@ namespace InsuranceBankWebApiProject.Controllers
                 LoginId=model.LoginId,
                 UserStatus="Active"
             };
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await this._userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Created" });
             }
-            if(! await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            if(! await this._roleManager.RoleExistsAsync(UserRoles.Admin))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                await this._roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             }
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            if (await this._roleManager.RoleExistsAsync(UserRoles.Admin))
             {
-                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+                await this._userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
 
             return this.Ok(new Response { Message = "User Created Successfully", Status = "Success" });
@@ -81,14 +88,14 @@ namespace InsuranceBankWebApiProject.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             Debug.WriteLine("The Email is : "+model.Email);
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await this._userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
             }
-            if(user!=null && await _userManager.CheckPasswordAsync(user, model.Password))
+            if(user!=null && await this._userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userRoles=await _userManager.GetRolesAsync(user);
+                var userRoles=await this._userManager.GetRolesAsync(user);
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name,user.UserName),
@@ -120,20 +127,20 @@ namespace InsuranceBankWebApiProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" }); ;
             
         }
-        [HttpPost]
+        [HttpPut]
         [Route("{adminId}/ChangePassword")]
         public async Task<IActionResult> ChangePassword(string adminId, ChangePasswordModel model)
         {
             if (ModelState.IsValid)
             {
-                var userExist = await _userManager.FindByIdAsync(adminId);
+                var userExist = await this._userManager.FindByIdAsync(adminId);
                 if (userExist == null)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
                 }
                 if (model.NewPassword.Equals(model.ConfirmNewPassword))
                 {
-                    var result = await _userManager.ChangePasswordAsync(userExist, model.OldPassword, model.NewPassword);
+                    var result = await this._userManager.ChangePasswordAsync(userExist, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
                         return this.Ok(new Response { Message = "Password Updated Successfully", Status = "Success" });
@@ -152,7 +159,7 @@ namespace InsuranceBankWebApiProject.Controllers
         public async Task<List<ApplicationUser>> GetAllAdmins()
         {
             
-            return _userManager.Users.ToList();
+            return this._userManager.Users.ToList();
            
         }
         
@@ -172,14 +179,14 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             Debug.WriteLine("Outside IF Condition");
             //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
-            var isStateExist = _stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
+            var isStateExist = this._stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
             if (isStateExist!=null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "State Already Exists" });
             }
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
-            await _stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
+            await this._stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
             return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
         }
 
@@ -196,13 +203,13 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             Debug.WriteLine("Outside IF Condition");
             //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
-            var isStateExist = _stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
+            var isStateExist = this._stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
             if (isStateExist != null)
             {
                 if(model.Status=="Active" || model.Status == "InActive")
                 {
                     isStateExist.Status=model.Status;
-                    await _stateManager.Update(isStateExist);
+                    await this._stateManager.Update(isStateExist);
                     return this.Ok(new Response { Message = "State Updated Successfully", Status = "Success" });
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid State Status" });
@@ -217,7 +224,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllStates")]
         public async Task<List<State>> GetAllStates()
         {
-            return _stateManager.GetAll();
+            return this._stateManager.GetAll();
         }
 
         [HttpPost]
@@ -232,14 +239,14 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             Debug.WriteLine("Outside IF Condition");
             //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
-            var city = _cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
+            var city = this._cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
             if (city != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "City Already Exists" });
             }
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
-            await _cityManager.Add(new City() { CityName = model.CityName, Status = model.Status,State=model.State });
+            await this._cityManager.Add(new City() { CityName = model.CityName, Status = model.Status,State=model.State });
             return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
         }
 
@@ -256,14 +263,14 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             Debug.WriteLine("Outside IF Condition");
             //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
-            var city = _cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
+            var city = this._cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
             if (city != null)
             {
                 if (model.Status == "Active" || model.Status == "InActive")
                 {
                     city.Status = model.Status;
                     city.State= model.State;
-                    await _cityManager.Update(city);
+                    await this._cityManager.Update(city);
                     return this.Ok(new Response { Message = "City Updated Successfully", Status = "Success" });
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid City Status" });
@@ -278,8 +285,218 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllCities")]
         public async Task<List<City>> GetAllCities()
         {
-            return _cityManager.GetAll();
+            return this._cityManager.GetAll();
+        }
+        [HttpGet]
+        [Route("GetAllInsuranceTypes")]
+        public async Task<List<InsuranceTypeGetDto>> GetAllInsuranceTypes()
+        {
+            List<InsuranceTypeGetDto> insuranceTypeList=new List<InsuranceTypeGetDto>();
+            var insuranceTypes= this._insuranceTypeManager.GetAll();
+            foreach(var insuranceType in insuranceTypes)
+            {
+                using (MemoryStream stream = new MemoryStream(insuranceType.Image))
+                {
+                    stream.Position=0;
+                    Bitmap returnImage = (Bitmap)Image.FromStream(stream,true);
+                    insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage,InsuranceName=insuranceType.InsuranceName,Status=insuranceType.Status });
+                }
+            }
+            return insuranceTypeList;
         }
 
+        [HttpPost]
+        [Route("AddInsuranceType")]
+        public async Task<IActionResult> AddInsuranceType([FromForm] InsuranceTypeAddDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var insuranceType = this._insuranceTypeManager.GetAll().Find(x => x.InsuranceName == model.InsuranceName);
+            if (insuranceType != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Already Exists" });
+            }
+            if (model.Image.Length > 0)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await model.Image.CopyToAsync(stream);
+                    await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() }) ;
+                    // model.Image = stream.ToArray();
+                    return this.Ok(new Response { Message = "InsuranceType Added Successfully", Status = "Success" });
+                }
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceType Not Added" });
+        }
+        [HttpGet]
+        [Route("GetSingleInsurance")]
+        public async Task<IActionResult> GetSingleInsurance()
+        {
+            
+            var insuranceTypes = this._insuranceTypeManager.GetAll();
+            foreach (var insuranceType in insuranceTypes)
+            {
+                using (MemoryStream stream = new MemoryStream(insuranceType.Image))
+                {
+                    stream.Position = 0;
+                    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
+                    return File(insuranceType.Image, "image/jpg", "Dinesh");
+                    //return this.Ok(insuranceType.Image);
+                    //insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
+                }
+            }
+            return this.Ok("Image Not Found");
+        }
+
+        [HttpPut]
+        [Route("{insuranceTypeId}/UpdateInsuranceType")]
+        public async Task<IActionResult> UpdateInsuranceType([FromForm]InsuranceTypeAddDto model,int insuranceTypeId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var insuranceType = this._insuranceTypeManager.GetAll().Find(x => x.Id == insuranceTypeId);
+            if (insuranceType == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+            if (model.Status == "Active" || model.Status == "InActive")
+            {
+               
+                insuranceType.Status =model.Status;
+                insuranceType.InsuranceName = model.InsuranceName;
+                var newImage = insuranceType.Image;
+                if (model.Image.Length > 0)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await model.Image.CopyToAsync(stream);
+                        //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
+                        // model.Image = stream.ToArray();
+                        newImage = stream.ToArray();
+                        
+                    }
+                }
+                await this._insuranceTypeManager.Update(insuranceType);
+
+                return this.Ok(new Response { Message = "InsuranceType Updated Successfully", Status = "Success" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceType Not Update" });
+
+        }
+
+        [HttpGet]
+        [Route("GetAllInsuranceSchemes")]
+        public async Task<List<InsuranceSchemeGetDto>> GetAllInsuranceSchemes()
+        {
+            List<InsuranceSchemeGetDto> insuranceSchemeList = new List<InsuranceSchemeGetDto>();
+            var insuranceSchemes = this._insuranceSchemeManager.GetAll();
+            foreach (var insuranceScheme in insuranceSchemes)
+            {
+                using (MemoryStream stream = new MemoryStream(insuranceScheme.Image))
+                {
+                    stream.Position = 0;
+                    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
+                    insuranceSchemeList.Add(new InsuranceSchemeGetDto() 
+                    { 
+                        Image = returnImage,
+                        InsuranceSchemeName=insuranceScheme.InsuranceSchemeName,
+                        Status = insuranceScheme.Status,
+                        InstallmentComission=insuranceScheme.InstallmentComission,
+                        InsuranceTypeName=insuranceScheme.InsuranceTypeName,
+                        NewRegComission=insuranceScheme.NewRegComission });
+                }
+            }
+            return insuranceSchemeList;
+        }
+        [HttpPost]
+        [Route("AddInsuranceScheme")]
+        public async Task<IActionResult> AddInsuranceScheme([FromForm] InsuranceSchemeAddDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var isInsuranceTypeExist = this._insuranceTypeManager.GetAll().Find(x => x.InsuranceName == model.InsuranceTypeName);
+            var isInsuranceSchemeExit= this._insuranceSchemeManager.GetAll().Find(x=>x.InsuranceSchemeName == model.InsuranceSchemeName);
+            if(isInsuranceTypeExist == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+            if(isInsuranceSchemeExit != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceScheme Already Exist" });
+            }
+            if (model.Image.Length > 0)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await model.Image.CopyToAsync(stream);
+                    //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
+                    // model.Image = stream.ToArray();
+                    await this._insuranceSchemeManager.Add(new InsuranceScheme()
+                    {
+                        InsuranceTypeName = model.InsuranceTypeName,
+                        InsuranceSchemeName = model.InsuranceSchemeName,
+                        Image = stream.ToArray(),
+                        InstallmentComission = model.InstallmentComission,
+                        NewRegComission = model.NewRegComission,
+                        Status = model.Status,
+                    });
+                    return this.Ok(new Response { Message = "InsuranceScheme Added Successfully", Status = "Success" });
+                }
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceScheme Not Added" });
+        }
+        [HttpPut]
+        [Route("{insuranceSchemeId}/UpdateInsuranceScheme")]
+        public async Task<IActionResult> UpdateInsuranceScheme([FromForm] InsuranceSchemeAddDto model, int insuranceSchemeId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var insuranceScheme = this._insuranceSchemeManager.GetAll().Find(x => x.Id == insuranceSchemeId);
+            if (insuranceScheme == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceScheme Not Found" });
+            }
+            var insuranceType = this._insuranceTypeManager.GetAll().Find(x => x.InsuranceName == model.InsuranceTypeName);
+            if (insuranceType == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+            if (model.Status == "Active" || model.Status == "InActive")
+            {
+
+                insuranceScheme.Status = model.Status;
+                insuranceScheme.InsuranceTypeName = model.InsuranceTypeName;
+                insuranceScheme.InsuranceSchemeName = model.InsuranceSchemeName;
+                insuranceScheme.InstallmentComission = model.InstallmentComission;
+                insuranceScheme.NewRegComission= model.NewRegComission;
+                
+                var newImage = insuranceScheme.Image;
+                if (model.Image.Length > 0)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await model.Image.CopyToAsync(stream);
+                        //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
+                        // model.Image = stream.ToArray();
+                        newImage = stream.ToArray();
+
+                    }
+                }
+                await this._insuranceTypeManager.Update(insuranceType);
+
+                return this.Ok(new Response { Message = "InsuranceScheme Updated Successfully", Status = "Success" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceScheme Not Update" });
+
+        }
     }
 }
