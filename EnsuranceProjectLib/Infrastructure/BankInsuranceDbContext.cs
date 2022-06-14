@@ -40,6 +40,7 @@ namespace EnsuranceProjectLib.Infrastructure
         public DbSet<CustomerDocument> CustomersDocuments { get; set; }
         public DbSet<InsuranceType> InsuranceTypes { get; set; }
         public DbSet<InsuranceScheme> InsuranceSchemes { get; set; }
+        public DbSet<InsurancePlan> InsurancePlans { get; set;}
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer(@"server=.\sqlexpress;database=BankInsurance;trusted_connection=true");

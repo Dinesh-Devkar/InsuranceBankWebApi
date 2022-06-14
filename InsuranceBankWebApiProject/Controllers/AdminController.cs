@@ -25,6 +25,7 @@ namespace InsuranceBankWebApiProject.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAllRepository<City> _cityManager;
+        private readonly IAllRepository<InsurancePlan> _insurancePlanManager;
         private readonly IAllRepository<InsuranceScheme> _insuranceSchemeManager;
         private readonly IAllRepository<State> _stateManager;
         private readonly IAllRepository<InsuranceType> _insuranceTypeManager;
@@ -43,6 +44,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._cityManager = new AllRepository<City>(bankInsuranceDb);
             this._insuranceTypeManager= new AllRepository<InsuranceType>(bankInsuranceDb);
             this._insuranceSchemeManager= new AllRepository<InsuranceScheme>(bankInsuranceDb);
+            this._insurancePlanManager= new AllRepository<InsurancePlan>(bankInsuranceDb);
             this._bankInsuranceDbContext = bankInsuranceDb;
             this._userManager = userManager;
             this._configuration = configuration;
@@ -498,5 +500,71 @@ namespace InsuranceBankWebApiProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceScheme Not Update" });
 
         }
+
+        [HttpGet]
+        [Route("GetAllInsurancePlans")]
+        public async Task<List<InsurancePlanGetDto>> GetAllInsurancePlans()
+        {
+            List<InsurancePlanGetDto> insurancePlansList = new List<InsurancePlanGetDto>();
+            var insurancePlans = this._insurancePlanManager.GetAll();
+            foreach (var insurancePlan in insurancePlans)
+            {
+                insurancePlansList.Add(new InsurancePlanGetDto()
+                {
+                    InsuranceType = insurancePlan.InsuranceType,
+                    InsuranceScheme = insurancePlan.InsuranceScheme,
+                    MinimumYears = insurancePlan.MinimumYears,
+                    MaximumYears = insurancePlan.MaximumYears,
+                    MinimumAge = insurancePlan.MinimumAge,
+                    MaximumAge = insurancePlan.MaximumAge,
+                    MinimumInvestAmt = insurancePlan.MinimumInvestAmt,
+                    MaximumInvestAmt = insurancePlan.MaximumInvestAmt,
+                    ProfitRatio = insurancePlan.ProfitRatio,
+                    Status = insurancePlan.Status
+
+                });
+            }
+            return insurancePlansList;
+        }
+        [HttpPost]
+        [Route("AddInsurancePlan")]
+        public async Task<IActionResult> AddInsurancePlan([FromForm] InsurancePlanAddDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var isInsuranceTypeExist = this._insuranceTypeManager.GetAll().Find(x => x.InsuranceName == model.InsuranceType);
+            var isInsuranceSchemeExit = this._insuranceSchemeManager.GetAll().Find(x => x.InsuranceSchemeName == model.InsuranceScheme);
+            if (isInsuranceTypeExist == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+            if (isInsuranceSchemeExit == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceScheme Not Found" });
+            }
+            var isInsurancePlanExit = this._insurancePlanManager.GetAll().Find(x => x.InsurancePlanName == model.InsurancePlanName);
+            if (isInsurancePlanExit != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsurancePlan Already Exists" });
+            }
+            await this._insurancePlanManager.Add(new InsurancePlan()
+            {
+                InsurancePlanName = model.InsurancePlanName,
+                InsuranceScheme = model.InsuranceScheme,
+                InsuranceType = model.InsuranceType,
+                MaximumAge = model.MaximumAge,
+                MinimumAge = model.MinimumAge,
+                MaximumInvestAmt = model.MaximumInvestAmt,
+                MinimumInvestAmt = model.MinimumInvestAmt,
+                MaximumYears = model.MaximumYear,
+                MinimumYears = model.MinimumYears,
+                ProfitRatio = model.ProfitRatio,
+                Status = model.Status
+            });
+            return this.Ok(new Response() { Status = "Success", Message = "InsurancePlan Added Successfully" });
+        }
+
     }
 }
