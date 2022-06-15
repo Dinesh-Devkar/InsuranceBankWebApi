@@ -42,7 +42,9 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Employee Already Exists" });
             }
-            var loginIdExists = this._employeeManager.GetAll().Find(x => x.LoginId == model.LoginId);
+            //var loginIdExists = this._employeeManager.GetAll().Find(x => x.LoginId == model.LoginId);
+            var loginIdExists = this._userManager.Users.FirstAsync(x => x.LoginId == model.LoginId);
+
             if (loginIdExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });

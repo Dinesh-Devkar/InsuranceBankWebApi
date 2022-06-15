@@ -21,6 +21,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public string? NomineeRelation { get; set; }
         public int? AgentCode { get; set; }
         public string? UserRoll { get; set; }
+        public string? Qualification { get; set; }
 
         public List<CustomerDocument> Documents { get; set; }
     }

@@ -55,6 +55,7 @@ namespace InsuranceBankWebApiProject.Controllers
         public async Task<IActionResult> Register([FromBody]AdminAddDto model)
         {
             var userExist = await this._userManager.FindByEmailAsync(model.Email);
+           
             if (userExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Already Exists" });
