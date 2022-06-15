@@ -19,7 +19,8 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public int? PinCode { get; set; }
         public string? NomineeName { get; set; }
         public string? NomineeRelation { get; set; }
-        public string? AgentId { get; set; }
+        public int? AgentCode { get; set; }
+        public string? UserRoll { get; set; }
 
         public List<CustomerDocument> Documents { get; set; }
     }
