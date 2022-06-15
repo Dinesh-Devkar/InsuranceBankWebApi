@@ -234,7 +234,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("AddCity")]
         public async Task<IActionResult> AddCity([FromBody] CityAddDto model)
         {
-            Debug.WriteLine("Inside Add State");
+            Debug.WriteLine("Inside Add City");
             if (!ModelState.IsValid)
             {
                 Debug.WriteLine("Inside Model State");
@@ -250,7 +250,7 @@ namespace InsuranceBankWebApiProject.Controllers
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
             await this._cityManager.Add(new City() { CityName = model.CityName, Status = model.Status,State=model.State });
-            return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
+            return this.Ok(new Response { Message = "City Added Successfully", Status = "Success" });
         }
 
 
