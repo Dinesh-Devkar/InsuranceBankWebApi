@@ -66,7 +66,8 @@ namespace InsuranceBankWebApiProject.Controllers
                 UserName = model.UserName,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 LoginId=model.LoginId,
-                UserStatus="Active"
+                UserStatus="Active",
+                
             };
             var result = await this._userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
