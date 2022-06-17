@@ -1,8 +1,10 @@
 ﻿using EnsuranceProjectEntityLib.Model.Common;
+using EnsuranceProjectEntityLib.Model.CustomerModel;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Agent;
 using InsuranceBankWebApiProject.DtoClasses.Common;
+using InsuranceBankWebApiProject.DtoClasses.Customer;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,12 +26,14 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
 
-        public AgentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AgentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext dbContext)
         {
             this._userManager = userManager;
             this._configuration = configuration;
             this._roleManager = roleManager;
+            this._insuranceAccountManager=new AllRepository<InsuranceAccount>(dbContext);
         }
         [HttpPost]
         [Route("Register")]
@@ -157,6 +161,35 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return agentsList;
 
+        }
+
+        [HttpGet]
+        [Route("{agentCode}/GetInsuranceAccountsByAgentCode")]
+        public async Task<List<InsuranceAccountGetDto>> GetInsuranceAccountsByAgentCode(string agentCode)
+        {
+            List<InsuranceAccountGetDto> insuranceAccountsList = new List<InsuranceAccountGetDto>();
+            var insuranceAccounts = this._insuranceAccountManager.GetAll().Where(x => x.AgentCode == agentCode).ToList();
+            foreach (var insuranceAccount in insuranceAccounts)
+            {
+                insuranceAccountsList.Add(new InsuranceAccountGetDto()
+                {
+                    AgentCode = insuranceAccount.AgentCode,
+                    CustomerId = insuranceAccount.CustomerId,
+                    CustomerName = insuranceAccount.CustomerName,
+                    DateCreated = insuranceAccount.DateCreated,
+                    InstallmentAmount = insuranceAccount.InstallmentAmount,
+                    InsuranceScheme = insuranceAccount.InsuranceScheme,
+                    InsuranceType = insuranceAccount.InsuranceType,
+                    InterestAmount = insuranceAccount.InterestAmount,
+                    InvestmentAmount = insuranceAccount.InvestmentAmount,
+                    MaturityDate = insuranceAccount.MaturityDate,
+                    NumberOfYears = insuranceAccount.NumberOfYears,
+                    PremiumType = insuranceAccount.PremiumType,
+                    ProfitRatio = insuranceAccount.ProfitRatio,
+                    TotalAmount = insuranceAccount.TotalAmount,
+                });
+            }
+            return insuranceAccountsList;
         }
     }
 }

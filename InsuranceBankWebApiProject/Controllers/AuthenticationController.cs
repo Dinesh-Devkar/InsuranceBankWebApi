@@ -68,5 +68,34 @@ namespace InsuranceBankWebApiProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" }); ;
 
         }
+        [HttpPut]
+        [Route("{userId}/ChangePassword")]
+        public async Task<IActionResult> ChangePassword(string userId, ChangePasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userExist = await this._userManager.FindByIdAsync(userId);
+                if (userExist == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
+                }
+                var result1 = _userManager.PasswordHasher.VerifyHashedPassword(userExist, userExist.PasswordHash, model.OldPassword);
+                if (result1 != PasswordVerificationResult.Success)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password Given" });
+                }
+                if (model.NewPassword.Equals(model.ConfirmNewPassword))
+                {
+                    var result = await this._userManager.ChangePasswordAsync(userExist, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return this.Ok(new Response { Message = "Password Updated Successfully", Status = "Success" });
+                    }
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Password and Confirm Password does not match" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+
+        }
     }
 }

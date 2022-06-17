@@ -22,6 +22,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly IAllRepository<State> _stateManager;
         private readonly IAllRepository<City> _cityManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext bankInsuranceDb)
         {
             this._userManager = userManager;
@@ -29,6 +30,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._roleManager = roleManager;
             this._stateManager=new AllRepository<State>(bankInsuranceDb);
             this._cityManager = new AllRepository<City>(bankInsuranceDb);
+            this._insuranceAccountManager=new AllRepository<InsuranceAccount>(bankInsuranceDb);
         }
         [HttpPost]
         [Route("Register")]
@@ -115,5 +117,100 @@ namespace InsuranceBankWebApiProject.Controllers
             return customersList;
 
         }
+        [HttpPut]
+        [Route("{customerId}/ChangePassword")]
+        public async Task<IActionResult> ChangePassword(string customerId, ChangePasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userExist = await this._userManager.FindByIdAsync(customerId);
+                if (userExist == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
+                }
+                var result1 = _userManager.PasswordHasher.VerifyHashedPassword(userExist, userExist.PasswordHash, model.OldPassword);
+                if (result1 != PasswordVerificationResult.Success)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password Given" });
+                }
+                if (model.NewPassword.Equals(model.ConfirmNewPassword))
+                {
+                    var result = await this._userManager.ChangePasswordAsync(userExist, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return this.Ok(new Response { Message = "Password Updated Successfully", Status = "Success" });
+                    }
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Password and Confirm Password does not match" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
+
+        }
+        
+        [HttpPost]
+        [Route("AddInsuranceAccount")]
+        public async Task<IActionResult> AddInsuranceAccount(InsuranceAccountAddDto model)
+        {
+            var customer=await this._userManager.FindByIdAsync(model.CustomerId);
+            if(customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Not Found With Given Id" });
+            }
+            var agentCodeExists=await this._userManager.Users.Where(x=>x.UserRoll==UserRoles.Agent && x.AgentCode==int.Parse(model.AgentCode)).FirstOrDefaultAsync();
+            if(agentCodeExists == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code" });
+            }
+            var insuranceAccount = new InsuranceAccount()
+            {
+                AgentCode = model.AgentCode,
+                CustomerId = model.CustomerId,
+                CustomerName = model.CustomerName,
+                DateCreated = model.DateCreated,
+                InstallmentAmount = model.InstallmentAmount,
+                InsuranceScheme = model.InsuranceScheme,
+                InsuranceType = model.InsuranceType,
+                InterestAmount = model.InterestAmount,
+                InvestmentAmount = model.InvestmentAmount,
+                MaturityDate = model.MaturityDate,
+                NumberOfYears = model.NumberOfYears,
+                PremiumType = model.PremiumType,
+                ProfitRatio = model.ProfitRatio,
+                TotalAmount = model.TotalAmount,
+            };
+            await this._insuranceAccountManager.Add(insuranceAccount);
+            return this.Ok(new Response { Status = "Success", Message = "Insurance Plan Purchased Successfully" });
+
+        }
+        [HttpGet]
+        [Route("GetAllInsuranceAccounts")]
+        public async Task<List<InsuranceAccountGetDto>> GetAllInsuranceAccounts()
+        {
+            List<InsuranceAccountGetDto> insuranceAccountsList=new List<InsuranceAccountGetDto>();
+            var insuranceAccounts = this._insuranceAccountManager.GetAll();
+            foreach(var insuranceAccount in insuranceAccounts)
+            {
+                insuranceAccountsList.Add(new InsuranceAccountGetDto()
+                {
+                    AgentCode = insuranceAccount.AgentCode,
+                    CustomerId = insuranceAccount.CustomerId,
+                    CustomerName = insuranceAccount.CustomerName,
+                    DateCreated = insuranceAccount.DateCreated,
+                    InstallmentAmount = insuranceAccount.InstallmentAmount,
+                    InsuranceScheme = insuranceAccount.InsuranceScheme,
+                    InsuranceType = insuranceAccount.InsuranceType,
+                    InterestAmount = insuranceAccount.InterestAmount,
+                    InvestmentAmount = insuranceAccount.InvestmentAmount,
+                    MaturityDate = insuranceAccount.MaturityDate,
+                    NumberOfYears = insuranceAccount.NumberOfYears,
+                    PremiumType = insuranceAccount.PremiumType,
+                    ProfitRatio = insuranceAccount.ProfitRatio,
+                    TotalAmount = insuranceAccount.TotalAmount,
+                });
+            }
+            return insuranceAccountsList;
+        }
+
+        
     }
 }
