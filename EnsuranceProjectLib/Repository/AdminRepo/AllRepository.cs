@@ -34,6 +34,11 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
             return  _dbEntity.ToList();
         }
 
+        public async Task<T> GetById(int entityId)
+        {
+            return await _dbEntity.FindAsync(_dbEntity);
+        }
+
         public async Task Update(T entity)
         {
            _dbEntity.Update(entity);           

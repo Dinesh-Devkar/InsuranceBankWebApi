@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "d6V4TYCaNFAhwd6iP9q+UNMWnD/1Ny6n1F+egtAfPatDMBnYx2WNHFWe1khnzCjLnZxxyB4cu9PonRdvF9Ynmw==",
+  "dgSpecHash": "BV7bQ0nRAdP4P6rZPt0bADbnRqniyCe0zMu3PDYEgCN53ThDErukciY6wwOoDZSJHWKQZtFCN9aTl2AxWZBDcA==",
   "success": true,
   "projectFilePath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\InsuranceBankWebApiProject.csproj",
   "expectedPackageFiles": [
@@ -11,6 +11,7 @@
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.authentication.cookies\\2.2.0\\microsoft.aspnetcore.authentication.cookies.2.2.0.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.authentication.core\\2.2.0\\microsoft.aspnetcore.authentication.core.2.2.0.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.5\\microsoft.aspnetcore.authentication.jwtbearer.6.0.5.nupkg.sha512",
+    "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.cors\\2.2.0\\microsoft.aspnetcore.cors.2.2.0.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.5\\microsoft.aspnetcore.cryptography.internal.6.0.5.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\6.0.5\\microsoft.aspnetcore.cryptography.keyderivation.6.0.5.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.dataprotection\\2.2.0\\microsoft.aspnetcore.dataprotection.2.2.0.nupkg.sha512",

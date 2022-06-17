@@ -12,7 +12,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
     {
         public string? LoginId { get; set; }
         public string? UserStatus { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public string? DateOfBirth { get; set; }
         public string? Address { get; set; }
         public string? State { get; set; }
         public string? City { get; set; }
@@ -21,6 +21,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public string? NomineeRelation { get; set; }
         public int? AgentCode { get; set; }
         public string? UserRoll { get; set; }
+        public string? Qualification { get; set; }
 
         public List<CustomerDocument> Documents { get; set; }
     }

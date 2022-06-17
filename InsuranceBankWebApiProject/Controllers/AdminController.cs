@@ -17,11 +17,13 @@ using System.Diagnostics;
 using EnsuranceProjectEntityLib.Model.Insurance;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
 using System.Drawing;
+using Microsoft.AspNetCore.Cors;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [EnableCors()]
     public class AdminController : ControllerBase
     {
         private readonly IAllRepository<City> _cityManager;
@@ -55,18 +57,30 @@ namespace InsuranceBankWebApiProject.Controllers
         public async Task<IActionResult> Register([FromBody]AdminAddDto model)
         {
             var userExist = await this._userManager.FindByEmailAsync(model.Email);
+           
             if (userExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Already Exists" });
             }
             //var loginIdExists=await 
+            var loginIdExists = this._userManager.Users.ToList().Find(x => x.LoginId == model.LoginId);
+
+            if (loginIdExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });
+            }
+            if (!model.Password.Equals(model.ConfirmPassword))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "PAssword and Confirm Password not Match" });
+            }
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
-                UserName = model.UserName,
+                UserName = model.Name,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 LoginId=model.LoginId,
-                UserStatus="Active",
+                UserStatus=model.UserStatus,
+                UserRoll=model.UserRoll,
                 
             };
             var result = await this._userManager.CreateAsync(user, model.Password);
@@ -141,6 +155,11 @@ namespace InsuranceBankWebApiProject.Controllers
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
                 }
+                var result1 = _userManager.PasswordHasher.VerifyHashedPassword(userExist, userExist.PasswordHash, model.OldPassword);
+                if (result1 != PasswordVerificationResult.Success)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password Given" });
+                }
                 if (model.NewPassword.Equals(model.ConfirmNewPassword))
                 {
                     var result = await this._userManager.ChangePasswordAsync(userExist, model.OldPassword, model.NewPassword);
@@ -155,7 +174,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         }
 
-        [Authorize(Roles = UserRoles.Admin)]
+        
         [HttpGet]
         [Route("GetAllAdmins")]
         
@@ -164,6 +183,25 @@ namespace InsuranceBankWebApiProject.Controllers
             
             return this._userManager.Users.ToList();
            
+        }
+        
+        [HttpGet]
+        [Route("{adminId}/GetAdminDetails")]
+        public async Task<IActionResult> GetAdminDetails(string adminId)
+        {
+            var admin= await this._userManager.FindByIdAsync(adminId);
+            if(admin == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Admin Not Found" });
+            }
+            return this.Ok(new AdminGetDto()
+            {
+                Email = admin.Email,
+                LoginId = admin.LoginId,
+                Name = admin.UserName,
+                UserRoll = admin.UserRoll,
+                UserStatus = admin.UserStatus,
+            });
         }
         
         [HttpPost]
@@ -234,7 +272,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("AddCity")]
         public async Task<IActionResult> AddCity([FromBody] CityAddDto model)
         {
-            Debug.WriteLine("Inside Add State");
+            Debug.WriteLine("Inside Add City");
             if (!ModelState.IsValid)
             {
                 Debug.WriteLine("Inside Model State");
@@ -250,7 +288,7 @@ namespace InsuranceBankWebApiProject.Controllers
             //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
             //_bankInsuranceDbContext.SaveChanges();
             await this._cityManager.Add(new City() { CityName = model.CityName, Status = model.Status,State=model.State });
-            return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
+            return this.Ok(new Response { Message = "City Added Successfully", Status = "Success" });
         }
 
 
@@ -298,12 +336,12 @@ namespace InsuranceBankWebApiProject.Controllers
             var insuranceTypes= this._insuranceTypeManager.GetAll();
             foreach(var insuranceType in insuranceTypes)
             {
-                using (MemoryStream stream = new MemoryStream(insuranceType.Image))
-                {
-                    stream.Position=0;
-                    Bitmap returnImage = (Bitmap)Image.FromStream(stream,true);
-                    insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage,InsuranceName=insuranceType.InsuranceName,Status=insuranceType.Status });
-                }
+                //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
+                //{
+                //    stream.Position=0;
+                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream,true);
+                //    insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage,InsuranceName=insuranceType.InsuranceName,Status=insuranceType.Status });
+                //}
             }
             return insuranceTypeList;
         }
@@ -325,8 +363,8 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 using (var stream = new MemoryStream())
                 {
-                    await model.Image.CopyToAsync(stream);
-                    await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() }) ;
+                    //await model.Image.CopyToAsync(stream);
+                    await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status }) ;
                     // model.Image = stream.ToArray();
                     return this.Ok(new Response { Message = "InsuranceType Added Successfully", Status = "Success" });
                 }
@@ -342,14 +380,14 @@ namespace InsuranceBankWebApiProject.Controllers
             var insuranceTypes = this._insuranceTypeManager.GetAll();
             foreach (var insuranceType in insuranceTypes)
             {
-                using (MemoryStream stream = new MemoryStream(insuranceType.Image))
-                {
-                    stream.Position = 0;
-                    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
-                    return File(insuranceType.Image, "image/jpg", "Dinesh");
-                    //return this.Ok(insuranceType.Image);
-                    //insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
-                }
+                //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
+                //{
+                //    stream.Position = 0;
+                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
+                //    return File(insuranceType.Image, "image/jpg", "Dinesh");
+                //    //return this.Ok(insuranceType.Image);
+                //    //insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
+                //}
             }
             return this.Ok("Image Not Found");
         }
@@ -377,10 +415,10 @@ namespace InsuranceBankWebApiProject.Controllers
                 {
                     using (var stream = new MemoryStream())
                     {
-                        await model.Image.CopyToAsync(stream);
+                        //await model.Image.CopyToAsync(stream);
                         //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
                         // model.Image = stream.ToArray();
-                        newImage = stream.ToArray();
+                        //newImage = stream.ToArray();
                         
                     }
                 }
@@ -400,19 +438,19 @@ namespace InsuranceBankWebApiProject.Controllers
             var insuranceSchemes = this._insuranceSchemeManager.GetAll();
             foreach (var insuranceScheme in insuranceSchemes)
             {
-                using (MemoryStream stream = new MemoryStream(insuranceScheme.Image))
-                {
-                    stream.Position = 0;
-                    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
-                    insuranceSchemeList.Add(new InsuranceSchemeGetDto() 
-                    { 
-                        Image = returnImage,
-                        InsuranceSchemeName=insuranceScheme.InsuranceSchemeName,
-                        Status = insuranceScheme.Status,
-                        InstallmentComission=insuranceScheme.InstallmentComission,
-                        InsuranceTypeName=insuranceScheme.InsuranceTypeName,
-                        NewRegComission=insuranceScheme.NewRegComission });
-                }
+                //using (MemoryStream stream = new MemoryStream(insuranceScheme.Image))
+                //{
+                //    stream.Position = 0;
+                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
+                //    insuranceSchemeList.Add(new InsuranceSchemeGetDto() 
+                //    { 
+                //        Image = returnImage,
+                //        InsuranceSchemeName=insuranceScheme.InsuranceSchemeName,
+                //        Status = insuranceScheme.Status,
+                //        InstallmentComission=insuranceScheme.InstallmentComission,
+                //        InsuranceTypeName=insuranceScheme.InsuranceTypeName,
+                //        NewRegComission=insuranceScheme.NewRegComission });
+                //}
             }
             return insuranceSchemeList;
         }
@@ -438,14 +476,14 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 using (var stream = new MemoryStream())
                 {
-                    await model.Image.CopyToAsync(stream);
+                    //await model.Image.CopyToAsync(stream);
                     //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
                     // model.Image = stream.ToArray();
                     await this._insuranceSchemeManager.Add(new InsuranceScheme()
                     {
                         InsuranceTypeName = model.InsuranceTypeName,
                         InsuranceSchemeName = model.InsuranceSchemeName,
-                        Image = stream.ToArray(),
+                        //Image = stream.ToArray(),
                         InstallmentComission = model.InstallmentComission,
                         NewRegComission = model.NewRegComission,
                         Status = model.Status,
@@ -487,10 +525,10 @@ namespace InsuranceBankWebApiProject.Controllers
                 {
                     using (var stream = new MemoryStream())
                     {
-                        await model.Image.CopyToAsync(stream);
+                        //await model.Image.CopyToAsync(stream);
                         //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
                         // model.Image = stream.ToArray();
-                        newImage = stream.ToArray();
+                        //newImage = stream.ToArray();
 
                     }
                 }

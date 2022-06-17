@@ -6,7 +6,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
     {
         [Required(ErrorMessage ="InsuranceType Is Required")]
         public string InsuranceName { get; set; }
-        public IFormFile Image { get; set; }
+        public string Image { get; set; }
         [Required(ErrorMessage = "Status Is Required")]
         public string Status { get; set; }
     }

@@ -8,8 +8,9 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
         public string InsuranceSchemeName { get; set; }
         public string InsuranceTypeName { get; set; }
         public string Status { get; set; }
-        public Bitmap Image { get; set; }
+        public string Image { get; set; }
         public int NewRegComission { get; set; }
         public int InstallmentComission { get; set; }
+        public string Note { get; set; }
     }
 }

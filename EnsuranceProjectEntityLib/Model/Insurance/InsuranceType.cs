@@ -10,7 +10,7 @@ namespace EnsuranceProjectEntityLib.Model.Insurance
     {
         public int Id { get; set; }
         public string InsuranceName { get; set; }
-        public Byte[] Image { get; set; }
+        public string Image { get; set; }
         public string Status { get; set; }
     }
 }
