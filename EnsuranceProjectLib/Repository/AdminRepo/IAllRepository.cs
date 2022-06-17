@@ -11,6 +11,7 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
         Task Add(T entity);
         List<T> GetAll();
         Task Update(T entity);
+        Task<T> GetById(int entityId);
 
     }
 }

@@ -17,5 +17,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Employee
         public string UserRoll { get; set; }
         [Required(ErrorMessage = "Password Is Required")]
         public string Password { get; set; }
+        [Required(ErrorMessage = "ConfirmPassword Is Required")]
+        public string ConfirmPassword { get; set; }
     }
 }

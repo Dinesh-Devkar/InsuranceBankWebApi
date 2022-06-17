@@ -4,28 +4,23 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
 {
     public class CustomerGetDto
     {
-        [Required]
+       
         public string Name { get; set; }
 
-        [Required]
-        public DateTime DateOfBirth { get; set; }
-        [Required]
+        
+        public string DateOfBirth { get; set; }
+        
         public string LoginId { get; set; }
-        [Required]
+        
         public string Address { get; set; }
-        [Required]
+        
         public string Email { get; set; }
-        [Required]
-        public string State { get; set; }
-        [Required]
-        public string City { get; set; }
-        [Required]
-        public int PinCode { get; set; }
-        [Required]
-        public int MobileNumber { get; set; }
-        [Required]
+        
+        public string MobileNumber { get; set; }
+        
         public string NomineeName { get; set; }
-        [Required]
+        
         public string NomineeRelation { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Agent
         [Required(ErrorMessage ="Name Is Required")]
         public string Name { get; set; }
         [Required(ErrorMessage = "AgentCode Is Required")]
-        public int AgentCode { get; set; }
+        public string AgentCode { get; set; }
         [Required(ErrorMessage = "Email Is Required")]
         public string Email { get; set; }
         [Required(ErrorMessage = "Password Is Required")]
@@ -20,7 +20,8 @@ namespace InsuranceBankWebApiProject.DtoClasses.Agent
         public string Qualification { get; set; }
         [Required(ErrorMessage = "Status Is Required")]
         public string Status { get; set; }
-        [Required(ErrorMessage ="UserRoll Is Required")]
-        public string UserRoll { get; set; }
+        
+        [Required(ErrorMessage ="ConfirmPassword Is Required")]
+        public string  ConfirmPassword { get; set; }
     }
 }

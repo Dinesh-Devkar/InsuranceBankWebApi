@@ -3,6 +3,7 @@ using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Agent;
 using InsuranceBankWebApiProject.DtoClasses.Common;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace InsuranceBankWebApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors()]
     public class AgentController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -31,7 +33,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromForm] AgentAddDto model)
+        public async Task<IActionResult> Register([FromBody] AgentAddDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -45,10 +47,18 @@ namespace InsuranceBankWebApiProject.Controllers
             //var loginIdExists = this._employeeManager.GetAll().Find(x => x.LoginId == model.LoginId);
             var loginIdExists = this._userManager.Users.ToList().Find(x=>x.LoginId==model.LoginId);
             Debug.WriteLine("The Login Id Exists : " + loginIdExists);
-            Debug.WriteLine(loginIdExists.LoginId);
             if (loginIdExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });
+            }
+            var agentCodeExists= this._userManager.Users.ToList().Find(x => x.AgentCode == int.Parse(model.AgentCode));
+            if (agentCodeExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Code Already Exists Use Another Agent Code" });
+            }
+            if (model.Password != model.ConfirmPassword)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Password And Confirm Password Does Not Match" });
             }
 
             ApplicationUser agent = new ApplicationUser()
@@ -61,7 +71,7 @@ namespace InsuranceBankWebApiProject.Controllers
                 UserStatus = model.Status,
                 Address= model.Address,
                 Qualification=model.Qualification,
-                AgentCode=model.AgentCode
+                AgentCode=int.Parse(model.AgentCode)
                 
             };
             var result = await this._userManager.CreateAsync(agent, model.Password);
@@ -122,6 +132,30 @@ namespace InsuranceBankWebApiProject.Controllers
                 });
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" }); ;
+
+        }
+        [HttpGet]
+        [Route("GetAllAgents")]
+        public async Task<List<AgentGetDto>> GetAllAgents()
+        {
+            List<AgentGetDto> agentsList = new List<AgentGetDto>();
+            var agents= await this._userManager.Users.Where(x=>x.UserRoll==UserRoles.Agent).ToListAsync();
+            foreach (var agent in agents)
+            {
+                agentsList.Add(new AgentGetDto()
+                {
+                    UserRoll = agent.UserRoll,
+                    Address = agent.Address,
+                    AgentCode = agent.AgentCode.GetValueOrDefault(),
+                    Email = agent.Email,
+                    LoginId = agent.LoginId,
+                    Name = agent.UserName,
+                    Qualification = agent.Qualification,
+                    Status = agent.UserStatus
+
+                });
+            }
+            return agentsList;
 
         }
     }
