@@ -27,6 +27,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
+        private readonly IAllRepository<CommissionRecord> _commissionRecordManager;
 
         public AgentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext dbContext)
         {
@@ -34,6 +35,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._configuration = configuration;
             this._roleManager = roleManager;
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(dbContext);
+            this._commissionRecordManager = new AllRepository<CommissionRecord>(dbContext);
         }
         [HttpPost]
         [Route("Register")]
@@ -162,13 +164,44 @@ namespace InsuranceBankWebApiProject.Controllers
             return agentsList;
 
         }
+        [HttpGet]
+        [Route("{agentId}/GetAgentById")]
+        public async Task<IActionResult> GetAgentById(string agentId)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+            }
+            return this.Ok(new AgentGetDto()
+            {
+                Name = agent.UserName,
+                Address = agent.Address,
+                AgentCode = agent.AgentCode.GetValueOrDefault(),
+                Email = agent.Email,
+                LoginId = agent.LoginId,
+                Qualification = agent.Qualification,
+                Status = agent.UserStatus,
+                UserRoll = agent.UserRoll
+
+            });
+        }
 
         [HttpGet]
-        [Route("{agentCode}/GetInsuranceAccountsByAgentCode")]
-        public async Task<List<InsuranceAccountGetDto>> GetInsuranceAccountsByAgentCode(string agentCode)
+        [Route("{agentId}/GetInsuranceAccountsByAgentId")]
+        public async Task<IActionResult> GetInsuranceAccountsByAgentId(string agentId)
         {
             List<InsuranceAccountGetDto> insuranceAccountsList = new List<InsuranceAccountGetDto>();
-            var insuranceAccounts = this._insuranceAccountManager.GetAll().Where(x => x.AgentCode == agentCode).ToList();
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent==null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+            }
+            if (agent.UserRoll != UserRoles.Agent)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+            }
+            var insuranceAccounts = this._insuranceAccountManager.GetAll().Where(x => x.AgentCode == agent.AgentCode.ToString()).ToList();
             foreach (var insuranceAccount in insuranceAccounts)
             {
                 insuranceAccountsList.Add(new InsuranceAccountGetDto()
@@ -187,9 +220,100 @@ namespace InsuranceBankWebApiProject.Controllers
                     PremiumType = insuranceAccount.PremiumType,
                     ProfitRatio = insuranceAccount.ProfitRatio,
                     TotalAmount = insuranceAccount.TotalAmount,
+                    AccountNumber=insuranceAccount.Id
+                    
                 });
             }
-            return insuranceAccountsList;
+            return this.Ok(insuranceAccountsList);
         }
+        [HttpGet]
+        [Route("{agentId}/GetAllCustomersByAgentId")]
+        public async Task<IActionResult> GetAllCustomersByAgentId(string agentId)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent.UserRoll != UserRoles.Agent)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+            }
+            List<CustomerGetDto> customersList = new List<CustomerGetDto>();
+            var customers = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Customer && x.AgentCode == agent.AgentCode).ToListAsync();
+            foreach (var customer in customers)
+            {
+                customersList.Add(new CustomerGetDto()
+                {
+                    Name = customer.UserName,
+                    Address = customer.Address,
+                    DateOfBirth = customer.DateOfBirth,
+                    Email = customer.Email,
+                    LoginId = customer.LoginId,
+                    MobileNumber = customer.PhoneNumber,
+                    NomineeName = customer.NomineeName,
+                    NomineeRelation = customer.NomineeRelation,
+                    Status = customer.UserStatus
+
+                });
+            }
+            return this.Ok(customersList);
+
+        }
+        [HttpGet]
+        [Route("{agentId}/GetCommissionRecordsByAgentId")]
+        public async Task<IActionResult> GetCommissionRecordsByAgentId(string agentId)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+            }
+            List<CommissionRecordGetDto> commissionRecorsList = new List<CommissionRecordGetDto>();
+            var commissionRecords = this._commissionRecordManager.GetAll().Where(x => x.AgentCode == agent.AgentCode.ToString()).ToList();
+            foreach (var commissionRecord in commissionRecords)
+            {
+                commissionRecorsList.Add(new CommissionRecordGetDto()
+                {
+                    AgentName = commissionRecord.AgentName,
+                    CommissionAmount = commissionRecord.CommissionAmount,
+                    CustomerName = commissionRecord.CustomerName,
+                    InsuranceAccountId = commissionRecord.InsuranceAccountId,
+                    InsuranceScheme = commissionRecord.InsuranceScheme,
+                    PurchasedDate = commissionRecord.PurchasedDate
+                });
+            }
+            return this.Ok(commissionRecorsList);
+        }
+        //[HttpGet]
+        //[Route("{agentId}/GetCustomersOfAgent")]
+        //public async Task<IActionResult> GetCustomersOfAgent(string agentId)
+        //{
+        //    List<CustomerGetDto> customersList = new List<CustomerGetDto>();
+        //    var agent= await this._userManager.FindByIdAsync(agentId);
+        //    if (agent == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Agent Not Found", Status = "Error" });
+        //    }
+        //    var customers= await this._userManager.Users.Where(x=>x.AgentCode == agent.AgentCode && x.UserRoll==UserRoles.Customer).ToListAsync();
+        //    foreach(var customer in customers)
+        //    {
+        //        Debug.WriteLine(customer.State);
+        //        Debug.WriteLine(customer.City);
+        //        Debug.WriteLine(customer.PinCode);
+        //        customersList.Add(new CustomerGetDto()
+        //        {
+        //            Address = customer.Address,
+        //            City = customer.City,
+        //            DateOfBirth = customer.DateOfBirth,
+        //            Email = customer.Email,
+        //            LoginId = customer.LoginId,
+        //            MobileNumber = customer.PhoneNumber,
+        //            Name = customer.UserName,
+        //            NomineeName = customer.NomineeName,
+        //            NomineeRelation = customer.NomineeRelation,
+        //            PinCode = customer.PinCode.ToString(),
+        //            State = customer.State,
+        //            Status = customer.UserStatus
+        //        });
+        //    }
+        //    return  this.Ok(customersList);
+        //}
     }
 }

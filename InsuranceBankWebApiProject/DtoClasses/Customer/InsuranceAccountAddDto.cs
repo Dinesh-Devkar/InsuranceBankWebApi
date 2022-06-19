@@ -26,11 +26,11 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
         public string DateCreated { get; set; }
         [Required(ErrorMessage = "Maturity Date Is Required")]
         public string MaturityDate { get; set; }
-        [Required(ErrorMessage = "Customer Name Is Required")]
+       
         public string CustomerName { get; set; }
         [Required(ErrorMessage = "CustomerId Is Required")]
         public string CustomerId { get; set; }
-        [Required(ErrorMessage = "AgentCode Is Required")]
-        public string AgentCode { get; set; }
+        
+        public int AgentCode { get; set; }
     }
 }

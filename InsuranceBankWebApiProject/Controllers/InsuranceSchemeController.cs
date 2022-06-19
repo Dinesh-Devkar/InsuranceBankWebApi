@@ -158,6 +158,27 @@ namespace InsuranceBankWebApiProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceScheme Not Update" });
 
         }
+        [HttpGet]
+        [Route("{insuranceSchemeName}/GetInsuranceSchemeDetails")]
+        public async Task<IActionResult> GetInsuranceSchemeDetails(string insuranceSchemeName)
+        {
+            var insuranceScheme=this._insuranceSchemeManager.GetAll().Find(x=>x.InsuranceSchemeName==insuranceSchemeName);
+            if (insuranceScheme == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Insurance Scheme Not Found" });
+            }
+            return this.Ok(new InsuranceSchemeGetDto
+            {
+                Note = insuranceScheme.Note,
+                Image = insuranceScheme.Image,
+                InsuranceSchemeName = insuranceSchemeName,
+                InstallmentComission = insuranceScheme.InstallmentComission,
+                InsuranceTypeName = insuranceScheme.InsuranceTypeName,
+                NewRegComission = insuranceScheme.NewRegComission,
+                Status = insuranceScheme.Status
+
+            });
+        }
 
     }
 }

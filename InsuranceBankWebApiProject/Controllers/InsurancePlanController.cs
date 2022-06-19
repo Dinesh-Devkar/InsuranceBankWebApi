@@ -5,6 +5,7 @@ using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -86,6 +87,30 @@ namespace InsuranceBankWebApiProject.Controllers
             });
             return this.Ok(new Response() { Status = "Success", Message = "InsurancePlan Added Successfully" });
         }
+        [HttpGet]
+        [Route("{insurancePlanName}/GetInsurancePlan")]
+        public async Task<IActionResult> GetInsurancePlan(string insurancePlanName)
+        {
+            var insurancePlan=this._insurancePlanManager.GetAll().Find(x=>x.InsurancePlanName == insurancePlanName);
+            if (insurancePlan == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Insurance Plan Not Found", Status = "Error" });
+            }
+            return this.Ok(new InsurancePlanGetDto
+            {
+                Status = insurancePlan.Status,
+                InsurancePlanName = insurancePlan.InsurancePlanName,
+                InsuranceScheme = insurancePlan.InsuranceScheme,
+                InsuranceType = insurancePlan.InsuranceType,
+                MaximumAge = insurancePlan.MaximumAge,
+                MaximumInvestAmt = insurancePlan.MaximumInvestAmt,
+                MaximumYears = insurancePlan.MaximumYears,
+                MinimumAge = insurancePlan.MinimumAge,
+                MinimumInvestAmt = insurancePlan.MinimumInvestAmt,
+                MinimumYears = insurancePlan.MinimumYears,
+                ProfitRatio = insurancePlan.ProfitRatio
+            });
+        }
         [HttpPut]
         [Route("{insurancePlanId}/UpdateInsurancePlan")]
         public async Task<IActionResult> UpdateInsurancePlan([FromForm] InsurancePlanAddDto model, int insurancePlanId)
@@ -124,5 +149,38 @@ namespace InsuranceBankWebApiProject.Controllers
             return this.Ok(new Response() { Status = "Success", Message = "InsurancePlan Updated Successfully" });
         }
 
+        [HttpGet]
+        [Route("{insuranceType}/GetInsurancePlansByInsuranceType")]
+        public async Task<IActionResult> GetInsurancePlansByInsuranceType(string insuranceType)
+        {
+            var insType=this._insuranceTypeManager.GetAll().Find(x=>x.InsuranceName==insuranceType);
+            if (insType == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+            List<InsurancePlansPurchaseDto> insurancePlansList = new List<InsurancePlansPurchaseDto>();
+            var insurancePlans = this._insurancePlanManager.GetAll().Where(x=>x.InsuranceType==insType.InsuranceName).ToList();
+            foreach (var insurancePlan in insurancePlans)
+            {
+                
+                insurancePlansList.Add(new InsurancePlansPurchaseDto()
+                {
+                 
+                    InsuranceType = insurancePlan.InsuranceType,
+                    InsuranceScheme = insurancePlan.InsuranceScheme,
+                    InsurancePlanName = insurancePlan.InsurancePlanName,
+                    MinimumYears = insurancePlan.MinimumYears,
+                    MaximumYears = insurancePlan.MaximumYears,
+                    MinimumAge = insurancePlan.MinimumAge,
+                    MaximumAge = insurancePlan.MaximumAge,
+                    MinimumInvestAmt = insurancePlan.MinimumInvestAmt,
+                    MaximumInvestAmt = insurancePlan.MaximumInvestAmt,
+                    ProfitRatio = insurancePlan.ProfitRatio,
+                    Note=this._insuranceSchemeManager.GetAll().Where(x=>x.InsuranceSchemeName==insurancePlan.InsuranceScheme).Select(x=>x.Note).FirstOrDefault()
+
+                });
+            }
+            return this.Ok(insurancePlansList);
+        }
     }
 }

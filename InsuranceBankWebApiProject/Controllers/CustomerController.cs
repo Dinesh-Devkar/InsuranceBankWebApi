@@ -1,6 +1,7 @@
 ﻿using EnsuranceProjectEntityLib.Model.AdminModel;
 using EnsuranceProjectEntityLib.Model.Common;
 using EnsuranceProjectEntityLib.Model.CustomerModel;
+using EnsuranceProjectEntityLib.Model.Insurance;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
@@ -10,6 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using Microsoft.Owin;
+using System.Transactions;
+using System.Web;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -18,11 +22,14 @@ namespace InsuranceBankWebApiProject.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAllRepository<InsuranceScheme> _insuranceSchemeManager;
+        private readonly IAllRepository<CommissionRecord> _commissionRecordManager;
         private readonly IConfiguration _configuration;
         private readonly IAllRepository<State> _stateManager;
         private readonly IAllRepository<City> _cityManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
+        private readonly BankInsuranceDbContext _bankInsuranceDbContext;
         public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext bankInsuranceDb)
         {
             this._userManager = userManager;
@@ -31,6 +38,9 @@ namespace InsuranceBankWebApiProject.Controllers
             this._stateManager=new AllRepository<State>(bankInsuranceDb);
             this._cityManager = new AllRepository<City>(bankInsuranceDb);
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(bankInsuranceDb);
+            this._commissionRecordManager=new AllRepository<CommissionRecord>(bankInsuranceDb);
+            this._insuranceSchemeManager=new AllRepository<InsuranceScheme>(bankInsuranceDb);
+            this._bankInsuranceDbContext = bankInsuranceDb;
         }
         [HttpPost]
         [Route("Register")]
@@ -92,7 +102,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
             return this.Ok(new Response { Message = "Customer Created Successfully", Status = "Success" });
         }
-        [HttpPost]
+        [HttpGet]
         [Route("GetAllCustomers")]
         public async Task<List<CustomerGetDto>> GetAllCustomers()
         {
@@ -117,6 +127,8 @@ namespace InsuranceBankWebApiProject.Controllers
             return customersList;
 
         }
+        
+
         [HttpPut]
         [Route("{customerId}/ChangePassword")]
         public async Task<IActionResult> ChangePassword(string customerId, ChangePasswordModel model)
@@ -156,30 +168,159 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Not Found With Given Id" });
             }
-            var agentCodeExists=await this._userManager.Users.Where(x=>x.UserRoll==UserRoles.Agent && x.AgentCode==int.Parse(model.AgentCode)).FirstOrDefaultAsync();
-            if(agentCodeExists == null)
+            var agentCodeExists = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Agent && x.AgentCode == model.AgentCode).FirstOrDefaultAsync();
+            if (agentCodeExists == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code" });
             }
-            var insuranceAccount = new InsuranceAccount()
+
+            //var a = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount)/100 ;
+            //Debug.WriteLine("The Result : " + a);
+            //using (this._bankInsuranceDbContext)
+            //{
+            //    using (var t = this._bankInsuranceDbContext.Database.BeginTransaction())
+            //    {
+            //        try
+            //        {
+            //            //AppUserManager appUserManager = HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
+
+            //            //AppUser member = await appUserManager.FindByIdAsync(User.Identity.GetUserId());
+
+            //            //member.HasScheduledChanges = true;
+
+            //            //IdentityResult identityResult = appUserManager.Update(member);
+            //            //scope.Complete();
+            //            var insuranceAccount = new InsuranceAccount()
+            //            {
+            //                AgentCode = model.AgentCode,
+            //                CustomerId = model.CustomerId,
+            //                CustomerName = model.CustomerName,
+            //                DateCreated = model.DateCreated,
+            //                InstallmentAmount = model.InstallmentAmount,
+            //                InsuranceScheme = model.InsuranceScheme,
+            //                InsuranceType = model.InsuranceType,
+            //                InterestAmount = model.InterestAmount,
+            //                InvestmentAmount = model.InvestmentAmount,
+            //                MaturityDate = model.MaturityDate,
+            //                NumberOfYears = model.NumberOfYears,
+            //                PremiumType = model.PremiumType,
+            //                ProfitRatio = model.ProfitRatio,
+            //                TotalAmount = model.TotalAmount,
+            //            };
+            //            await this._insuranceAccountManager.Add(insuranceAccount);
+
+
+            //            //var insId =await this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.Id).FirstOrDefault();
+            //            //var agentName = this._userManager.Users.Where(x => x.AgentCode == int.Parse(model.AgentCode) && x.UserRoll == UserRoles.Agent).Select(x=>x.UserName).FirstOrDefault();
+            //            //if ("Ram" != null)
+            //            //{
+
+            //            //}
+            //            await this._commissionRecordManager.Add(new CommissionRecord()
+            //            {
+            //                AgentCode = model.AgentCode,
+            //                AgentName = "Dinesh",
+            //                CustomerId = model.CustomerId,
+            //                CustomerName = model.CustomerName,
+            //                InsuranceAccountId = 2,
+            //                InsuranceScheme = model.InsuranceScheme,
+            //                PurchasedDate = model.DateCreated,
+            //                CommissionAmount = 9000 //(this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount)/100
+
+            //            });
+
+            //            t.Commit();
+            //            return this.Ok(new Response { Status = "Success", Message = "Insurance Plan Purchased Successfully" });
+
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            Debug.WriteLine(ex.Message);
+            //            t.Rollback();
+            //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = ex.Message });
+            //        }
+            //    }
+
+            //}
+
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                AgentCode = model.AgentCode,
-                CustomerId = model.CustomerId,
-                CustomerName = model.CustomerName,
-                DateCreated = model.DateCreated,
-                InstallmentAmount = model.InstallmentAmount,
-                InsuranceScheme = model.InsuranceScheme,
-                InsuranceType = model.InsuranceType,
-                InterestAmount = model.InterestAmount,
-                InvestmentAmount = model.InvestmentAmount,
-                MaturityDate = model.MaturityDate,
-                NumberOfYears = model.NumberOfYears,
-                PremiumType = model.PremiumType,
-                ProfitRatio = model.ProfitRatio,
-                TotalAmount = model.TotalAmount,
-            };
-            await this._insuranceAccountManager.Add(insuranceAccount);
-            return this.Ok(new Response { Status = "Success", Message = "Insurance Plan Purchased Successfully" });
+
+
+                try
+                {
+                    //using (this._bankInsuranceDbContext)
+                    //{
+
+
+                        //AppUserManager appUserManager = HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
+
+                        //AppUser member = await appUserManager.FindByIdAsync(User.Identity.GetUserId());
+
+                        //member.HasScheduledChanges = true;
+
+                        //IdentityResult identityResult = appUserManager.Update(member);
+                        //scope.Complete();
+                        //var appUserManager = HttpContext.GetOwinContext().GetUserManager<InsuranceAccount>();
+                        await this._commissionRecordManager.Add(new CommissionRecord()
+                        {
+                            AgentCode = model.AgentCode.ToString(),
+                            AgentName = agentCodeExists.UserName,
+                            CustomerId = model.CustomerId,
+                            CustomerName = model.CustomerName,
+                            InsuranceAccountId = 2,
+                            InsuranceScheme = model.InsuranceScheme,
+                            PurchasedDate = model.DateCreated,
+                            CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount)/100
+
+                        });
+                        var insuranceAccount = new InsuranceAccount()
+                        {
+                            AgentCode = model.AgentCode.ToString(),
+                            CustomerId = model.CustomerId,
+                            CustomerName = model.CustomerName,
+                            DateCreated = model.DateCreated,
+                            InstallmentAmount = model.InstallmentAmount,
+                            InsuranceScheme = model.InsuranceScheme,
+                            InsuranceType = model.InsuranceType,
+                            InterestAmount = model.InterestAmount,
+                            InvestmentAmount = model.InvestmentAmount,
+                            MaturityDate = model.MaturityDate,
+                            NumberOfYears = model.NumberOfYears,
+                            PremiumType = model.PremiumType,
+                            ProfitRatio = model.ProfitRatio,
+                            TotalAmount = model.TotalAmount,
+                        };
+
+                        await this._insuranceAccountManager.Add(insuranceAccount);
+
+                        //}
+                        //var insId =await this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.Id).FirstOrDefault();
+                        //var agentName = this._userManager.Users.Where(x => x.AgentCode == int.Parse(model.AgentCode) && x.UserRoll == UserRoles.Agent).Select(x=>x.UserName).FirstOrDefault();
+                        //if ("Ram" != null)
+                        //{
+                        //using (this._bankInsuranceDbContext)
+                        //{
+
+
+
+                        scope.Complete();
+                        //await this._bankInsuranceDbContext.DisposeAsync();
+                        return this.Ok(new Response { Status = "Success", Message = "Insurance Plan Purchased Successfully" });
+                        //}
+                   // }
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    scope.Dispose();
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = ex.Message });
+                }
+            }
+
+            //return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong" });
 
         }
         [HttpGet]
@@ -211,6 +352,48 @@ namespace InsuranceBankWebApiProject.Controllers
             return insuranceAccountsList;
         }
 
-        
+        [HttpGet]
+        [Route("{customerId}/GetCustomerById")]
+        public async Task<IActionResult> GetCustomerById(string customerId)
+        {
+            var customer=await this._userManager.FindByIdAsync(customerId);
+            if(customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,new Response { Message = "User Not Found", Status = "Error" });
+            }
+
+            return this.Ok(new CustomerGetDto
+            {
+                Name = customer.UserName,
+                LoginId = customer.LoginId,
+                Address = customer.Address,
+                DateOfBirth = customer.DateOfBirth,
+                Email = customer.Email,
+                MobileNumber = customer.PhoneNumber,
+                NomineeName = customer.NomineeName,
+                NomineeRelation = customer.NomineeRelation,
+                Status = customer.UserStatus,
+                City=customer.City,
+                PinCode= customer.PinCode.ToString(),
+                State=customer.State
+            });
+        }
+
+        [HttpGet]
+        [Route("{customerId}/GetCustomerNameAndAgentCode")]
+        public async Task<IActionResult> GetCustomerNameAndAgentCode(string customerId)
+        {
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "User Not Found", Status = "Error" });
+            }
+
+            return this.Ok(new CustomerNameAndAgentCodeDto()
+            {
+                AgentCode=customer.AgentCode.GetValueOrDefault(),
+                CustomerName=customer.UserName
+            });
+        }
     }
 }
