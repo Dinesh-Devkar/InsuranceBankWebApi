@@ -7,7 +7,11 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
        
         public string Name { get; set; }
 
+        public string State { get; set; }
         
+        public string City { get; set; }
+        
+        public string PinCode { get; set; }
         public string DateOfBirth { get; set; }
         
         public string LoginId { get; set; }

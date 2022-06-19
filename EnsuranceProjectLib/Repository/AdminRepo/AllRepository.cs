@@ -24,7 +24,7 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
         public async Task Add(T entity)
         {
             await _dbEntity.AddAsync(entity);
-            _bankDb.SaveChangesAsync();
+            await _bankDb.SaveChangesAsync().ConfigureAwait(true);
 
         }
 
