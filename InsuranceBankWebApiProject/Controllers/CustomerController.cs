@@ -30,6 +30,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         private readonly BankInsuranceDbContext _bankInsuranceDbContext;
+        private readonly IAllRepository<Query> _queryManager;
         public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext bankInsuranceDb)
         {
             this._userManager = userManager;
@@ -41,6 +42,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._commissionRecordManager=new AllRepository<CommissionRecord>(bankInsuranceDb);
             this._insuranceSchemeManager=new AllRepository<InsuranceScheme>(bankInsuranceDb);
             this._bankInsuranceDbContext = bankInsuranceDb;
+            this._queryManager=new AllRepository<Query>(bankInsuranceDb);
         }
         [HttpPost]
         [Route("Register")]
@@ -325,31 +327,26 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllInsuranceAccounts")]
-        public async Task<List<InsuranceAccountGetDto>> GetAllInsuranceAccounts()
+        public async Task<IActionResult> GetAllInsuranceAccounts()
         {
-            List<InsuranceAccountGetDto> insuranceAccountsList=new List<InsuranceAccountGetDto>();
+            List<InsuranceAccountShortDto> insuranceAccountsList=new List<InsuranceAccountShortDto>();
             var insuranceAccounts = this._insuranceAccountManager.GetAll();
             foreach(var insuranceAccount in insuranceAccounts)
             {
-                insuranceAccountsList.Add(new InsuranceAccountGetDto()
-                {
-                    AgentCode = insuranceAccount.AgentCode,
-                    CustomerId = insuranceAccount.CustomerId,
-                    CustomerName = insuranceAccount.CustomerName,
-                    DateCreated = insuranceAccount.DateCreated,
-                    InstallmentAmount = insuranceAccount.InstallmentAmount,
+                insuranceAccountsList.Add(new InsuranceAccountShortDto()
+                {                   
+                    DateCreated = insuranceAccount.DateCreated,                  
                     InsuranceScheme = insuranceAccount.InsuranceScheme,
-                    InsuranceType = insuranceAccount.InsuranceType,
-                    InterestAmount = insuranceAccount.InterestAmount,
+                    InsuranceType = insuranceAccount.InsuranceType,                   
                     InvestmentAmount = insuranceAccount.InvestmentAmount,
                     MaturityDate = insuranceAccount.MaturityDate,
-                    NumberOfYears = insuranceAccount.NumberOfYears,
                     PremiumType = insuranceAccount.PremiumType,
                     ProfitRatio = insuranceAccount.ProfitRatio,
                     TotalAmount = insuranceAccount.TotalAmount,
+                    AccountNumber=insuranceAccount.Id,
                 });
             }
-            return insuranceAccountsList;
+            return this.Ok(insuranceAccountsList);
         }
 
         [HttpGet]
@@ -394,6 +391,126 @@ namespace InsuranceBankWebApiProject.Controllers
                 AgentCode=customer.AgentCode.GetValueOrDefault(),
                 CustomerName=customer.UserName
             });
+        }
+
+        [HttpGet]
+        [Route("{customerId}/GetInsuranceAccountsByCustomerId")]
+        public async Task<IActionResult> GetInsuranceAccountsByCustomerId(string customerId)
+        {
+            List<InsuranceAccountShortDto> insuranceAccounts = new List<InsuranceAccountShortDto>();
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if(customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+            var accounts=this._insuranceAccountManager.GetAll().Where(x=>x.CustomerId==customerId).ToList();
+            foreach(var account in accounts)
+            {
+                insuranceAccounts.Add(new InsuranceAccountShortDto()
+                {
+                    AccountNumber = account.Id,
+                    DateCreated = account.DateCreated,
+                    InsuranceScheme = account.InsuranceScheme,
+                    InsuranceType = account.InsuranceType,
+                    InvestmentAmount = account.InvestmentAmount,
+                    MaturityDate = account.MaturityDate,
+                    PremiumType = account.PremiumType,
+                    ProfitRatio = account.ProfitRatio,
+                    TotalAmount = account.TotalAmount,
+                });
+            }
+            return this.Ok(insuranceAccounts);
+        }
+
+        [HttpPost]
+        [Route("{customerId}/UpdateCustomer")]
+        public async Task<IActionResult> UpdateCustomer(string customerId,CustomerUpdateDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "All Fields Are Required", Status = "Error" });
+            }
+            var customer=await this._userManager.FindByIdAsync(customerId);
+            if(customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+
+            customer.UserName = model.Name;
+            customer.State=model.State;
+            customer.Email = model.Email;
+            customer.Address = model.Address;
+            customer.City = model.City;
+            customer.PhoneNumber = model.MobileNumber;
+            customer.NomineeName = model.NomineeName;
+            customer.NomineeRelation= model.NomineeRelation;
+            customer.PinCode= model.PinCode;
+            customer.LoginId= model.LoginId;
+            customer.DateOfBirth = model.DateOfBirth;
+
+            await this._userManager.UpdateAsync(customer);
+            return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
+        }
+
+        //[HttpGet]
+        //[Route("{customerId}/GetCutomerAge")]
+        //public async Task<IActionResult> GetCustomerAge(string customerId)
+        //{
+        //    var customer = await this._userManager.FindByIdAsync(customerId);
+        //    if(customer == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+        //    }
+
+        //    var dateOfBirth= await this._userManager.Users.Where(x=>x.Id==customerId).FirstOrDefaultAsync();
+
+        //}
+        [HttpPost]
+        [Route("AddQuery")]
+        public async Task<IActionResult> AddQuery(AddQueryDto query)
+        {
+            var customer=await this._userManager.FindByIdAsync(query.CustomerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+
+
+            await this._queryManager.Add(new Query()
+            {
+                ContactDate = DateTime.Now.ToShortDateString(),
+                CustomerName = customer.UserName,
+                Message = query.Message,
+                Reply = "",
+                Status = QueryStatus.Pending,
+                Title = query.Title,
+                CustomerId=customer.Id
+            });
+            return this.Ok(new Response { Status = "Success", Message = "Your Query Added Successfully" });
+        }
+        [HttpGet]
+        [Route("{customerId}/GetAllQueriesByCustomerId")]
+        public async Task<IActionResult> GetAllQueriesByCustomerId(string customerId)
+        {
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+            List<GetQueryDto> queryList = new List<GetQueryDto>();
+            var queries=this._queryManager.GetAll().Where(x=>x.CustomerId==customerId).ToList();
+            foreach(var query in queries)
+            {
+                queryList.Add(new GetQueryDto()
+                {
+                    ContactDate = DateTime.Now.ToShortDateString(),
+                    CustomerName = query.CustomerName,
+                    Message = query.Message,
+                    Reply = query.Reply,
+                    Title = query.Title
+                });
+            }
+            return this.Ok(queryList);
         }
     }
 }

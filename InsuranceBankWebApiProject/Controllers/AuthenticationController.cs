@@ -28,6 +28,8 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+
+            // This Login Method Is Common For All The User (Admin,Agent,Employee,customer)
             var user = await this._userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -55,15 +57,29 @@ namespace InsuranceBankWebApiProject.Controllers
              //notBefore:
              signingCredentials: new SigningCredentials(authSignInKey, SecurityAlgorithms.HmacSha256));
 
+                //If logged in user is customer then will return his DateOfBirth Also
+                if (user.UserRoll == UserRoles.Customer)
+                {
+                    return this.Ok(new
+                    {
+                        token = new JwtSecurityTokenHandler().WriteToken(token),
+                        expire = token.ValidTo,
+                        UserName = user.UserName,
+                        userId = user.Id,
+                        userRoll = user.UserRoll,
+                        dateOfBirth = user.DateOfBirth
+
+                    });
+                }
                 return this.Ok(new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expire = token.ValidTo,
                     UserName = user.UserName,
                     userId = user.Id,
-                    userRoll=user.UserRoll
-
+                    userRoll = user.UserRoll
                 });
+
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" }); ;
 
@@ -72,6 +88,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("{userId}/ChangePassword")]
         public async Task<IActionResult> ChangePassword(string userId, ChangePasswordModel model)
         {
+            // This Change Password Method Is Common For All The User (Admin,Agent,Employee,customer)
             if (ModelState.IsValid)
             {
                 var userExist = await this._userManager.FindByIdAsync(userId);

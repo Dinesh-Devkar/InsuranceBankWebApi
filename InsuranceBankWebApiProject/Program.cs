@@ -58,8 +58,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseCors(
                 builder =>
                 {
@@ -67,6 +65,9 @@ app.UseCors(
                     builder.AllowAnyMethod();
                     builder.AllowAnyHeader();
                 });
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

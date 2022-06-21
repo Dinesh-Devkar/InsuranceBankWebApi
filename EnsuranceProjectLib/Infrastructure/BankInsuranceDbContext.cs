@@ -38,6 +38,7 @@ namespace EnsuranceProjectLib.Infrastructure
         //public DbSet<ApplicationUser> Customers { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<State> States { get; set; }
+        public DbSet<Query> Queries { get; set; } 
         public DbSet<CustomerDocument> CustomersDocuments { get; set; }
         public DbSet<InsuranceType> InsuranceTypes { get; set; }
         public DbSet<InsuranceScheme> InsuranceSchemes { get; set; }
