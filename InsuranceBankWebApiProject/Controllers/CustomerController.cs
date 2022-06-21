@@ -24,25 +24,19 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAllRepository<InsuranceScheme> _insuranceSchemeManager;
         private readonly IAllRepository<CommissionRecord> _commissionRecordManager;
-        private readonly IConfiguration _configuration;
-        private readonly IAllRepository<State> _stateManager;
-        private readonly IAllRepository<City> _cityManager;
+        private readonly IAllRepository<Payment> _paymentManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
-        private readonly BankInsuranceDbContext _bankInsuranceDbContext;
         private readonly IAllRepository<Query> _queryManager;
         public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext bankInsuranceDb)
         {
             this._userManager = userManager;
-            this._configuration = configuration;
             this._roleManager = roleManager;
-            this._stateManager=new AllRepository<State>(bankInsuranceDb);
-            this._cityManager = new AllRepository<City>(bankInsuranceDb);
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(bankInsuranceDb);
             this._commissionRecordManager=new AllRepository<CommissionRecord>(bankInsuranceDb);
             this._insuranceSchemeManager=new AllRepository<InsuranceScheme>(bankInsuranceDb);
-            this._bankInsuranceDbContext = bankInsuranceDb;
             this._queryManager=new AllRepository<Query>(bankInsuranceDb);
+            this._paymentManager=new AllRepository<Payment>(bankInsuranceDb);
         }
         [HttpPost]
         [Route("Register")]
@@ -286,8 +280,18 @@ namespace InsuranceBankWebApiProject.Controllers
                             AccountNumber=insuranceAccountNumber
                         };
 
-                        await this._insuranceAccountManager.Add(insuranceAccount);
+                    await this._insuranceAccountManager.Add(insuranceAccount);
 
+                    await this._paymentManager.Add(new Payment()
+                    {
+                        CustomerId = model.CustomerId,
+                        InstallmentAmount = model.InstallmentAmount,
+                        InstallmentDate = DateTime.Now.ToShortDateString(),
+                        InstallmentNumber = 1,
+                        PaidDate = DateTime.Now.ToShortDateString(),
+                        InsuranceAccountNumber=insuranceAccountNumber,
+                        PaymentStatus = "Paid"
+                    });
                     await this._commissionRecordManager.Add(new CommissionRecord()
                     {
                         AgentCode = model.AgentCode.ToString(),
