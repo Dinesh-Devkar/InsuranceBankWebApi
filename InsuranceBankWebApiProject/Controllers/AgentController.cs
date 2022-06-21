@@ -247,7 +247,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     PremiumType = insuranceAccount.PremiumType,
                     ProfitRatio = insuranceAccount.ProfitRatio,
                     TotalAmount = insuranceAccount.TotalAmount,
-                    AccountNumber=insuranceAccount.Id
+                    AccountNumber=insuranceAccount.AccountNumber
                     
                 });
             }

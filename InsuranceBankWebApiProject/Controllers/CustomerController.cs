@@ -191,7 +191,7 @@ namespace InsuranceBankWebApiProject.Controllers
             //            //member.HasScheduledChanges = true;
 
             //            //IdentityResult identityResult = appUserManager.Update(member);
-            //            //scope.Complete();
+            //            //scope.Complete(); 
             //            var insuranceAccount = new InsuranceAccount()
             //            {
             //                AgentCode = model.AgentCode,
@@ -256,27 +256,17 @@ namespace InsuranceBankWebApiProject.Controllers
                     //{
 
 
-                        //AppUserManager appUserManager = HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
+                    //AppUserManager appUserManager = HttpContext.GetOwinContext().GetUserManager<AppUserManager>();
 
-                        //AppUser member = await appUserManager.FindByIdAsync(User.Identity.GetUserId());
+                    //AppUser member = await appUserManager.FindByIdAsync(User.Identity.GetUserId());
 
-                        //member.HasScheduledChanges = true;
+                    //member.HasScheduledChanges = true;
 
-                        //IdentityResult identityResult = appUserManager.Update(member);
-                        //scope.Complete();
-                        //var appUserManager = HttpContext.GetOwinContext().GetUserManager<InsuranceAccount>();
-                        await this._commissionRecordManager.Add(new CommissionRecord()
-                        {
-                            AgentCode = model.AgentCode.ToString(),
-                            AgentName = agentCodeExists.UserName,
-                            CustomerId = model.CustomerId,
-                            CustomerName = model.CustomerName,
-                            InsuranceAccountId = 2,
-                            InsuranceScheme = model.InsuranceScheme,
-                            PurchasedDate = model.DateCreated,
-                            CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount)/100
-
-                        });
+                    //IdentityResult identityResult = appUserManager.Update(member);
+                    //scope.Complete();
+                    //var appUserManager = HttpContext.GetOwinContext().GetUserManager<InsuranceAccount>();
+                    var insuranceAccountNumber = Guid.NewGuid().ToString();
+                       
                         var insuranceAccount = new InsuranceAccount()
                         {
                             AgentCode = model.AgentCode.ToString(),
@@ -293,21 +283,35 @@ namespace InsuranceBankWebApiProject.Controllers
                             PremiumType = model.PremiumType,
                             ProfitRatio = model.ProfitRatio,
                             TotalAmount = model.TotalAmount,
+                            AccountNumber=insuranceAccountNumber
                         };
 
                         await this._insuranceAccountManager.Add(insuranceAccount);
 
-                        //}
-                        //var insId =await this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.Id).FirstOrDefault();
-                        //var agentName = this._userManager.Users.Where(x => x.AgentCode == int.Parse(model.AgentCode) && x.UserRoll == UserRoles.Agent).Select(x=>x.UserName).FirstOrDefault();
-                        //if ("Ram" != null)
-                        //{
-                        //using (this._bankInsuranceDbContext)
-                        //{
+                    await this._commissionRecordManager.Add(new CommissionRecord()
+                    {
+                        AgentCode = model.AgentCode.ToString(),
+                        AgentName = agentCodeExists.UserName,
+                        CustomerId = model.CustomerId,
+                        CustomerName = model.CustomerName,
+                        InsuranceAccountId = insuranceAccountNumber,
+                        InsuranceScheme = model.InsuranceScheme,
+                        PurchasedDate = model.DateCreated,
+                        CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
+
+                    });
+
+                    //}
+                    //var insId =await this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.Id).FirstOrDefault();
+                    //var agentName = this._userManager.Users.Where(x => x.AgentCode == int.Parse(model.AgentCode) && x.UserRoll == UserRoles.Agent).Select(x=>x.UserName).FirstOrDefault();
+                    //if ("Ram" != null)
+                    //{
+                    //using (this._bankInsuranceDbContext)
+                    //{
 
 
 
-                        scope.Complete();
+                    scope.Complete();
                         //await this._bankInsuranceDbContext.DisposeAsync();
                         return this.Ok(new Response { Status = "Success", Message = "Insurance Plan Purchased Successfully" });
                         //}
@@ -325,29 +329,7 @@ namespace InsuranceBankWebApiProject.Controllers
             //return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong" });
 
         }
-        [HttpGet]
-        [Route("GetAllInsuranceAccounts")]
-        public async Task<IActionResult> GetAllInsuranceAccounts()
-        {
-            List<InsuranceAccountShortDto> insuranceAccountsList=new List<InsuranceAccountShortDto>();
-            var insuranceAccounts = this._insuranceAccountManager.GetAll();
-            foreach(var insuranceAccount in insuranceAccounts)
-            {
-                insuranceAccountsList.Add(new InsuranceAccountShortDto()
-                {                   
-                    DateCreated = insuranceAccount.DateCreated,                  
-                    InsuranceScheme = insuranceAccount.InsuranceScheme,
-                    InsuranceType = insuranceAccount.InsuranceType,                   
-                    InvestmentAmount = insuranceAccount.InvestmentAmount,
-                    MaturityDate = insuranceAccount.MaturityDate,
-                    PremiumType = insuranceAccount.PremiumType,
-                    ProfitRatio = insuranceAccount.ProfitRatio,
-                    TotalAmount = insuranceAccount.TotalAmount,
-                    AccountNumber=insuranceAccount.Id,
-                });
-            }
-            return this.Ok(insuranceAccountsList);
-        }
+       
 
         [HttpGet]
         [Route("{customerId}/GetCustomerById")]
@@ -393,36 +375,9 @@ namespace InsuranceBankWebApiProject.Controllers
             });
         }
 
-        [HttpGet]
-        [Route("{customerId}/GetInsuranceAccountsByCustomerId")]
-        public async Task<IActionResult> GetInsuranceAccountsByCustomerId(string customerId)
-        {
-            List<InsuranceAccountShortDto> insuranceAccounts = new List<InsuranceAccountShortDto>();
-            var customer = await this._userManager.FindByIdAsync(customerId);
-            if(customer == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
-            }
-            var accounts=this._insuranceAccountManager.GetAll().Where(x=>x.CustomerId==customerId).ToList();
-            foreach(var account in accounts)
-            {
-                insuranceAccounts.Add(new InsuranceAccountShortDto()
-                {
-                    AccountNumber = account.Id,
-                    DateCreated = account.DateCreated,
-                    InsuranceScheme = account.InsuranceScheme,
-                    InsuranceType = account.InsuranceType,
-                    InvestmentAmount = account.InvestmentAmount,
-                    MaturityDate = account.MaturityDate,
-                    PremiumType = account.PremiumType,
-                    ProfitRatio = account.ProfitRatio,
-                    TotalAmount = account.TotalAmount,
-                });
-            }
-            return this.Ok(insuranceAccounts);
-        }
+       
 
-        [HttpPost]
+        [HttpPut]
         [Route("{customerId}/UpdateCustomer")]
         public async Task<IActionResult> UpdateCustomer(string customerId,CustomerUpdateDto model)
         {
@@ -511,6 +466,49 @@ namespace InsuranceBankWebApiProject.Controllers
                 });
             }
             return this.Ok(queryList);
+        }
+        [HttpGet]
+        [Route("GetAllQueries")]
+        public async Task<IActionResult> GetAllQueries()
+        {
+            List<GetQueryDto> queryList = new List<GetQueryDto>();
+            var queries = this._queryManager.GetAll().Where(x=>x.Status==QueryStatus.Pending);
+            foreach (var query in queries)
+            {
+                queryList.Add(new GetQueryDto()
+                {
+                    ContactDate = DateTime.Now.ToShortDateString(),
+                    CustomerName = query.CustomerName,
+                    Message = query.Message,
+                    Reply = query.Reply,
+                    Title = query.Title,
+                    CustomerId=query.CustomerId,
+                    QueryId=query.Id
+                });
+            }
+            return this.Ok(queryList);
+        }
+
+        [HttpPost]
+        [Route("SolveQuery")]
+        public async Task<IActionResult> SolveQuery(SolveQueryDto query)
+        {
+            var customer= await this._userManager.FindByIdAsync(query.CustomerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not TonGive Feedback Found", Status = "Error" });
+            }
+
+            var customerQuery = this._queryManager.GetAll().Find(x => x.Id == query.QueryId);
+            if (customerQuery != null)
+            {
+                customerQuery.Reply = query.Reply;
+                customerQuery.Status = QueryStatus.Success;
+                await this._queryManager.Update(customerQuery);
+                return this.Ok(new Response { Status = "Success", Message = "Feedback Given Successfully" });
+
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Query Not To Give Feedback Found", Status = "Error" });
         }
     }
 }

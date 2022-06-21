@@ -16,8 +16,8 @@ namespace InsuranceBankWebApiProject.Controllers
     {
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        public InsuranceAccountController(UserManager<ApplicationUser> userManager,BankInsuranceDbContext bankInsuranceDb)
-        {           
+        public InsuranceAccountController(UserManager<ApplicationUser> userManager, BankInsuranceDbContext bankInsuranceDb)
+        {
             this._insuranceAccountManager = new AllRepository<InsuranceAccount>(bankInsuranceDb);
             this._userManager = userManager;
         }
@@ -39,7 +39,8 @@ namespace InsuranceBankWebApiProject.Controllers
                     PremiumType = insuranceAccount.PremiumType,
                     ProfitRatio = insuranceAccount.ProfitRatio,
                     TotalAmount = insuranceAccount.TotalAmount,
-                    AccountNumber = insuranceAccount.Id,
+                    AccountNumber = insuranceAccount.AccountNumber,
+                    CustomerName=insuranceAccount.CustomerName
                 });
             }
             return this.Ok(insuranceAccountsList);
@@ -60,7 +61,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 insuranceAccounts.Add(new InsuranceAccountShortDto()
                 {
-                    AccountNumber = account.Id,
+                    //AccountNumber = account.Id,
                     DateCreated = account.DateCreated,
                     InsuranceScheme = account.InsuranceScheme,
                     InsuranceType = account.InsuranceType,
@@ -69,6 +70,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     PremiumType = account.PremiumType,
                     ProfitRatio = account.ProfitRatio,
                     TotalAmount = account.TotalAmount,
+                    AccountNumber=account.AccountNumber
                 });
             }
             return this.Ok(insuranceAccounts);
@@ -76,7 +78,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("{customerId}/GetInsuranceAccountByAccountId/{accountId}")]
-        public async Task<IActionResult> GetInsuranceAccountByAccountId(string customerId,int accountId)
+        public async Task<IActionResult> GetInsuranceAccountByAccountId(string customerId, string accountId)
         {
             //method will return the particular insurance account detail baded in customer and account ID
             //will return one single insurance plan purchase details
@@ -86,14 +88,14 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
             }
-            var account = this._insuranceAccountManager.GetAll().Find(x => x.CustomerId == customerId && x.Id==accountId);
+            var account = this._insuranceAccountManager.GetAll().Find(x => x.CustomerId == customerId && x.AccountNumber == accountId);
             if (account == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Insurance Account Not Found", Status = "Error" });
             }
             return this.Ok(new InsuranceAccountShortDto()
             {
-                AccountNumber = account.Id,
+                // AccountNumber = account.Id,
                 DateCreated = account.DateCreated,
                 InsuranceScheme = account.InsuranceScheme,
                 InsuranceType = account.InsuranceType,
@@ -102,6 +104,7 @@ namespace InsuranceBankWebApiProject.Controllers
                 PremiumType = account.PremiumType,
                 ProfitRatio = account.ProfitRatio,
                 TotalAmount = account.TotalAmount,
+                AccountNumber=account.AccountNumber
             });
         }
     }

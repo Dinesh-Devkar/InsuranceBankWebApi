@@ -16,6 +16,6 @@
         public string CustomerName { get; set; }
         public string CustomerId { get; set; }
         public string AgentCode { get; set; }
-        public int AccountNumber { get; set; }
+        public string AccountNumber { get; set; }
     }
 }
