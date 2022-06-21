@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    [Migration("20220614191146_AddEmployeeAndCustomerTable")]
-    partial class AddEmployeeAndCustomerTable
+    [Migration("20220620060212_intial-migration")]
+    partial class intialmigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -81,8 +81,8 @@ namespace EnsuranceProjectLib.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("AgentId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("AgentCode")
+                        .HasColumnType("int");
 
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
@@ -91,8 +91,8 @@ namespace EnsuranceProjectLib.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("DateOfBirth")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -136,6 +136,9 @@ namespace EnsuranceProjectLib.Migrations
                     b.Property<int?>("PinCode")
                         .HasColumnType("int");
 
+                    b.Property<string>("Qualification")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -148,6 +151,9 @@ namespace EnsuranceProjectLib.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("UserRoll")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserStatus")
                         .HasColumnType("nvarchar(max)");
@@ -163,6 +169,49 @@ namespace EnsuranceProjectLib.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("EnsuranceProjectEntityLib.Model.Common.CommissionRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AgentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AgentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("CommissionAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InsuranceAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InsuranceScheme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PurchasedDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CommissionRecords");
                 });
 
             modelBuilder.Entity("EnsuranceProjectEntityLib.Model.CustomerModel.CustomerDocument", b =>
@@ -188,6 +237,69 @@ namespace EnsuranceProjectLib.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.ToTable("CustomersDocuments");
+                });
+
+            modelBuilder.Entity("EnsuranceProjectEntityLib.Model.CustomerModel.InsuranceAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AgentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DateCreated")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("InstallmentAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("InsuranceScheme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InsuranceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("InterestAmount")
+                        .HasColumnType("float");
+
+                    b.Property<double>("InvestmentAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("MaturityDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfYears")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PremiumType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProfitRatio")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalAmount")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InsuranceAccounts");
                 });
 
             modelBuilder.Entity("EnsuranceProjectEntityLib.Model.Insurance.InsurancePlan", b =>
@@ -248,9 +360,9 @@ namespace EnsuranceProjectLib.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<byte[]>("Image")
+                    b.Property<string>("Image")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("InstallmentComission")
                         .HasColumnType("int");
@@ -265,6 +377,10 @@ namespace EnsuranceProjectLib.Migrations
 
                     b.Property<int>("NewRegComission")
                         .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -283,9 +399,9 @@ namespace EnsuranceProjectLib.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<byte[]>("Image")
+                    b.Property<string>("Image")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InsuranceName")
                         .IsRequired()

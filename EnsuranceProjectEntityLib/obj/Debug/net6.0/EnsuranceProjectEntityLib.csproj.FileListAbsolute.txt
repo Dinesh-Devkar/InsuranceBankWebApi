@@ -22,3 +22,15 @@ D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.deps.json
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.dll
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.GeneratedMSBuildEditorConfig.editorconfig
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfoInputs.cache
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfo.cs
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.CoreCompileInputs.cache
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.dll
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\refint\EnsuranceProjectEntityLib.dll
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+E:\SwabhavTrainingRepo\Project\InsuranceUI\Final API\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
