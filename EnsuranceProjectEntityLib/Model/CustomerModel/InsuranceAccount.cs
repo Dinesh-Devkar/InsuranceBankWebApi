@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace EnsuranceProjectEntityLib.Model.CustomerModel
     public class InsuranceAccount
     {
         public int Id { get; set; }
+        public string AccountNumber { get; set; }
         public string InsuranceType { get; set; }
         public string InsuranceScheme { get; set; }
         public int NumberOfYears { get; set; }          

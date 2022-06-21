@@ -2,7 +2,7 @@
 {
     public class CommissionRecordGetDto
     {
-        public int InsuranceAccountId { get; set; }
+        public string InsuranceAccountId { get; set; }
         public string InsuranceScheme { get; set; }
         public string CustomerName { get; set; }
         public string AgentName { get; set; }

@@ -9,7 +9,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
     public class CommissionRecord
     {
         public int Id { get; set; }
-        public int InsuranceAccountId { get; set; }
+        public string InsuranceAccountId { get; set; }
         public string InsuranceScheme { get; set; }
         public string   CustomerName { get; set; }
         public string AgentName { get; set; }
