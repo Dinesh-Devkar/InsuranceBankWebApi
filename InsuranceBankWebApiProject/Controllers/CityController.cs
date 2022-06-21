@@ -13,29 +13,27 @@ namespace InsuranceBankWebApiProject.Controllers
     public class CityController : ControllerBase
     {
         private readonly IAllRepository<City> _cityManager;
+        private readonly IAllRepository<State> _stateManager;
         public CityController(BankInsuranceDbContext dbContext)
         {
             this._cityManager=new AllRepository<City>(dbContext);
+            this._stateManager = new AllRepository<State>(dbContext);
         }
         [HttpPost]
         [Route("AddCity")]
         public async Task<IActionResult> AddCity([FromBody] CityAddDto model)
         {
-            Debug.WriteLine("Inside Add City");
+             //To Add New City In Database
             if (!ModelState.IsValid)
             {
-                Debug.WriteLine("Inside Model State");
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
             }
-            Debug.WriteLine("Outside IF Condition");
-            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+
             var city = this._cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
             if (city != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "City Already Exists" });
             }
-            //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
-            //_bankInsuranceDbContext.SaveChanges();
             await this._cityManager.Add(new City() { CityName = model.CityName, Status = model.Status, State = model.State });
             return this.Ok(new Response { Message = "City Added Successfully", Status = "Success" });
         }
@@ -45,14 +43,13 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("UpdateCity")]
         public async Task<IActionResult> UpdateCity([FromBody] CityAddDto model)
         {
-            Debug.WriteLine("Inside Add State");
+            //To Update City
             if (!ModelState.IsValid)
             {
-                Debug.WriteLine("Inside Model State");
+
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
             }
-            Debug.WriteLine("Outside IF Condition");
-            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+
             var city = this._cityManager.GetAll().ToList().Find(x => x.CityName == model.CityName);
             if (city != null)
             {
@@ -76,6 +73,27 @@ namespace InsuranceBankWebApiProject.Controllers
         public async Task<List<City>> GetAllCities()
         {
             return this._cityManager.GetAll();
+        }
+        [HttpGet]
+        [Route("{stateName}/GetCitiesByState")]
+        public async Task<IActionResult> GetCitiesByState(string stateName)
+        {
+            Debug.WriteLine("Parameter state : "+stateName);
+            var state=this._stateManager.GetAll().Find(x=>x.StateName == stateName);
+            Debug.WriteLine("Find State : " + state);
+            if (state == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "State Not Found" });
+            }
+            List<string> cityList = new List<string>();
+            var cities=this._cityManager.GetAll().Where(x=>x.State==state.StateName).ToList();
+            foreach (var city in cities)
+            {
+                cityList.Add(city.CityName);
+               
+            }
+            return this.Ok(cityList);
+
         }
     }
 }

@@ -86,6 +86,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 employeesList.Add(new EmployeeGetDto()
                 {
+                    Id = employee.Id,
                     Email = employee.Email,
                     LoginId = employee.LoginId,
                     Name = employee.UserName,
@@ -99,7 +100,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("{employeeId}/GetEmployeeById")]
-        public async Task<IActionResult> GetEmployeeById([FromBody] string employeeId)
+        public async Task<IActionResult> GetEmployeeById(string employeeId)
         {
             var employee=await this._userManager.Users.Where(x=>x.Id == employeeId).FirstOrDefaultAsync();
             if (employee == null)
@@ -113,6 +114,7 @@ namespace InsuranceBankWebApiProject.Controllers
                 Name = employee.UserName,
                 UserRoll = employee.UserRoll,
                 UserStatus = employee.UserStatus,
+                Id=employee.Id
             });
         }
         [HttpPut]
@@ -181,8 +183,27 @@ namespace InsuranceBankWebApiProject.Controllers
 
                 });
             }
-            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" }); ;
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password" });
 
+        }
+
+        [HttpPut]
+        [Route("{employeeId}/UpdateEmployee")]
+        public async Task<IActionResult> UpdateEmployee(string employeeId,EmployeeUpdateDto model)
+        {
+            var employee=await this._userManager.FindByIdAsync(employeeId);
+            if(employee == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Employee Not Found" }); ;
+            }
+            employee.Email = model.Email;
+            employee.UserName = model.Name;
+            employee.UserRoll = model.UserRoll;
+            employee.UserStatus = model.UserStatus;
+            employee.LoginId= model.LoginId;
+
+            await this._userManager.UpdateAsync(employee);
+            return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
         }
     }
 }
