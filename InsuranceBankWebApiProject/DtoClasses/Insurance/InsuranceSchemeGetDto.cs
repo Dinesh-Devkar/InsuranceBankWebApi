@@ -12,5 +12,6 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
         public int NewRegComission { get; set; }
         public int InstallmentComission { get; set; }
         public string Note { get; set; }
+        public int Id { get; set; }
     }
 }

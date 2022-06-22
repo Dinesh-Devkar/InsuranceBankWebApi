@@ -108,12 +108,13 @@ namespace InsuranceBankWebApiProject.Controllers
                 MinimumAge = insurancePlan.MinimumAge,
                 MinimumInvestAmt = insurancePlan.MinimumInvestAmt,
                 MinimumYears = insurancePlan.MinimumYears,
-                ProfitRatio = insurancePlan.ProfitRatio
+                ProfitRatio = insurancePlan.ProfitRatio,
+                Id=insurancePlan.Id
             });
         }
         [HttpPut]
         [Route("{insurancePlanId}/UpdateInsurancePlan")]
-        public async Task<IActionResult> UpdateInsurancePlan([FromForm] InsurancePlanAddDto model, int insurancePlanId)
+        public async Task<IActionResult> UpdateInsurancePlan(InsurancePlanAddDto model, int insurancePlanId)
         {
             if (!ModelState.IsValid)
             {
@@ -140,7 +141,7 @@ namespace InsuranceBankWebApiProject.Controllers
             insurancePlan.InsuranceScheme = model.InsuranceScheme;
             insurancePlan.ProfitRatio = model.ProfitRatio;
             insurancePlan.InsuranceType = model.InsuranceType;
-            insurancePlan.MinimumYears = model.MinimumYears;
+            insurancePlan.MaximumYears = model.MaximumYears;
             insurancePlan.MaximumAge = model.MaximumAge;
             insurancePlan.MinimumAge = model.MinimumAge;
             insurancePlan.MinimumInvestAmt = model.MinimumInvestAmt;
