@@ -41,7 +41,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] CustomerAddDto model)
+        public async Task<IActionResult> Register(CustomerAddDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -52,14 +52,14 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Already Exists" });
             }
-            
+
             var loginIdExists = this._userManager.Users.ToList().Find(x => x.LoginId == model.LoginId);
             Debug.WriteLine("The Login Id Exists : " + loginIdExists);
             if (loginIdExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });
             }
-            
+
             if (model.Password != model.ConfirmPassword)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Password And Confirm Password Does Not Match" });
@@ -73,14 +73,13 @@ namespace InsuranceBankWebApiProject.Controllers
                 LoginId = model.LoginId,
                 UserStatus = AccountStatus.Active,
                 Address = model.Address,
-                City= model.City,
-                DateOfBirth= model.DateOfBirth.ToShortDateString(),
-                NomineeName= model.NomineeName,
-                NomineeRelation= model.NomineeRelation,
-                PinCode= model.PinCode,
-                PhoneNumber=model.MobileNumber,
-                State=model.State,
-                AgentCode = int.Parse(model.AgentCode)
+                City = model.City,
+                DateOfBirth = model.DateOfBirth,
+                NomineeName = model.NomineeName,
+                NomineeRelation = model.NomineeRelation,
+                PinCode = int.Parse(model.PinCode),
+                PhoneNumber = model.MobileNumber,
+                State = model.State
 
             };
             var result = await this._userManager.CreateAsync(customer, model.Password);
@@ -167,9 +166,11 @@ namespace InsuranceBankWebApiProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Not Found With Given Id" });
             }
             var agentCodeExists = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Agent && x.AgentCode == model.AgentCode).FirstOrDefaultAsync();
-            if (agentCodeExists == null)
+            string agentName = null;
+            if (agentCodeExists != null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code" });
+                agentName = agentCodeExists.UserName;
+                //return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code" });
             }
 
             //var a = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount)/100 ;
@@ -297,7 +298,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     await this._commissionRecordManager.Add(new CommissionRecord()
                     {
                         AgentCode = model.AgentCode.ToString(),
-                        AgentName = agentCodeExists.UserName,
+                        AgentName = agentName,
                         CustomerId = model.CustomerId,
                         CustomerName = model.CustomerName,
                         InsuranceAccountId = insuranceAccountNumber,

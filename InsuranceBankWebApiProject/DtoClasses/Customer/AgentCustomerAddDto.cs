@@ -2,15 +2,15 @@
 
 namespace InsuranceBankWebApiProject.DtoClasses.Customer
 {
-    public class CustomerAddDto
+    public class AgentCustomerAddDto
     {
         [Required(ErrorMessage = "Name Is Required")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Date Of Birth Is Required")]
-        public String DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
         [Required(ErrorMessage = "LoginId Is Required")]
-        
+
         public string LoginId { get; set; }
         [Required(ErrorMessage = "Address Is Required")]
         public string Address { get; set; }
@@ -19,7 +19,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
         [Required(ErrorMessage = "City Is Required")]
         public string City { get; set; }
         [Required(ErrorMessage = "Pin Code Is Required")]
-        public string PinCode { get; set; }
+        public int PinCode { get; set; }
         [Required(ErrorMessage = "Mobile Number Is Required")]
         public string MobileNumber { get; set; }
         [Required(ErrorMessage = "Nominee Is Required")]
@@ -32,5 +32,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
         public string ConfirmPassword { get; set; }
         [Required(ErrorMessage = "Nominee Relation Is Required")]
         public string NomineeRelation { get; set; }
+        [Required(ErrorMessage = "Agent Code Is Required")]
+        public string AgentCode { get; set; }
     }
 }

@@ -360,7 +360,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("{agentId}/AddCustomer")]
-        public async Task<IActionResult> AddCustomer(string agentId,[FromBody] CustomerAddDto model)
+        public async Task<IActionResult> AddCustomer(string agentId,[FromBody] AgentCustomerAddDto model)
         {
             if (!ModelState.IsValid)
             {

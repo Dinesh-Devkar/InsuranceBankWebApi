@@ -114,7 +114,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{insuranceSchemeId}/UpdateInsuranceScheme")]
-        public async Task<IActionResult> UpdateInsuranceScheme([FromForm] InsuranceSchemeAddDto model, int insuranceSchemeId)
+        public async Task<IActionResult> UpdateInsuranceScheme(int insuranceSchemeId,InsuranceSchemeAddDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -138,19 +138,22 @@ namespace InsuranceBankWebApiProject.Controllers
                 insuranceScheme.InsuranceSchemeName = model.InsuranceSchemeName;
                 insuranceScheme.InstallmentComission = model.InstallmentComission;
                 insuranceScheme.NewRegComission = model.NewRegComission;
+                insuranceScheme.Image=model.Image;
+                insuranceScheme.Note=model.Note;
+                
 
-                var newImage = insuranceScheme.Image;
-                if (model.Image.Length > 0)
-                {
-                    using (var stream = new MemoryStream())
-                    {
-                        //await model.Image.CopyToAsync(stream);
-                        //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
-                        // model.Image = stream.ToArray();
-                        //newImage = stream.ToArray();
+                //var newImage = insuranceScheme.Image;
+                //if (model.Image.Length > 0)
+                //{
+                //    using (var stream = new MemoryStream())
+                //    {
+                //        //await model.Image.CopyToAsync(stream);
+                //        //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
+                //        // model.Image = stream.ToArray();
+                //        //newImage = stream.ToArray();
 
-                    }
-                }
+                //    }
+                //}
                 await this._insuranceTypeManager.Update(insuranceType);
 
                 return this.Ok(new Response { Message = "InsuranceScheme Updated Successfully", Status = "Success" });
@@ -175,8 +178,8 @@ namespace InsuranceBankWebApiProject.Controllers
                 InstallmentComission = insuranceScheme.InstallmentComission,
                 InsuranceTypeName = insuranceScheme.InsuranceTypeName,
                 NewRegComission = insuranceScheme.NewRegComission,
-                Status = insuranceScheme.Status
-
+                Status = insuranceScheme.Status,
+                Id=insuranceScheme.Id
             });
         }
 

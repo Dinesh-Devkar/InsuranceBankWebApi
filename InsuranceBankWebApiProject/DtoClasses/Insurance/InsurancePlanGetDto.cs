@@ -4,7 +4,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
 {
     public class InsurancePlanGetDto
     {
-        
+        public int Id { get; set; }
         public string InsuranceType { get; set; }
        
         public string InsuranceScheme { get; set; }

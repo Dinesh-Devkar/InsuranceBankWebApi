@@ -4,6 +4,8 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
 {
     public class InsuranceSchemeAddDto
     {
+        [Required(ErrorMessage ="Id Is Required")]
+        public int Id { get; set; }
         [Required(ErrorMessage ="InsuranceScheme Is Required")]
         public string InsuranceSchemeName { get; set; }
         [Required(ErrorMessage = "InsuranceType Is Required")]
