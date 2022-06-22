@@ -21,3 +21,4 @@ D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.dll
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache

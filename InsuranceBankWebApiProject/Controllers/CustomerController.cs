@@ -14,6 +14,7 @@ using System.Diagnostics;
 using Microsoft.Owin;
 using System.Transactions;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -100,6 +101,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllCustomers")]
+        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<List<CustomerGetDto>> GetAllCustomers()
         {
             List<CustomerGetDto> customersList= new List<CustomerGetDto>();
