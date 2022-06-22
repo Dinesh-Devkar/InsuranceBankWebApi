@@ -25,7 +25,7 @@ namespace InsuranceBankWebApiProject.Controllers
     [Route("api/v1/[controller]")]
     [ApiController]
     [EnableCors()]
-    [Authorize(Roles =UserRoles.Admin)]
+    
     public class AdminController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -39,6 +39,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> Register([FromBody] AdminAddDto model)
         {
             // For Admin Registration
@@ -86,6 +87,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
            //For Admin Login And Return Token
@@ -130,6 +132,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{adminId}/ChangePassword")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> ChangePassword(string adminId, ChangePasswordModel model)
         {
             //Update Password
@@ -161,6 +164,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("GetAllAdmins")]
+        [Authorize(Roles = UserRoles.Admin)]
 
         public async Task<List<ApplicationUser>> GetAllAdmins()
         {
@@ -171,6 +175,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("{adminId}/GetAdminDetails")]
+        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<IActionResult> GetAdminDetails(string adminId)
         {
             //Method Will Return The Admin Details To See In Profile
@@ -190,6 +195,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllEmployees")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<List<EmployeeGetDto>> GetAllEmployees()
         {
             List<EmployeeGetDto> employeesList = new List<EmployeeGetDto>();

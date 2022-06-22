@@ -313,7 +313,7 @@ namespace InsuranceBankWebApiProject.Controllers
             return this.Ok(commissionRecorsList);
         }
       
-        [HttpPost]
+        [HttpPut]
         [Route("{agentCode}/UpdateAgent")]
         public async Task<IActionResult> UpdateAgent(int? agentCode,UpdateAgentDto model)
         {
@@ -357,6 +357,71 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return  this.Ok(commissions);
 
+        }
+        [HttpPost]
+        [Route("{agentId}/AddCustomer")]
+        public async Task<IActionResult> AddCustomer(string agentId,[FromBody] CustomerAddDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
+            }
+            var agentExists= await this._userManager.FindByIdAsync(agentId);
+            if (agentExists == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found To Given Id" });
+            }
+            var customerExists = await this._userManager.FindByEmailAsync(model.Email);
+            if (customerExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Already Exists" });
+            }
+
+            var loginIdExists = this._userManager.Users.ToList().Find(x => x.LoginId == model.LoginId);
+            Debug.WriteLine("The Login Id Exists : " + loginIdExists);
+            if (loginIdExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });
+            }
+
+            if (model.Password != model.ConfirmPassword)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Password And Confirm Password Does Not Match" });
+            }
+            ApplicationUser customer = new ApplicationUser()
+            {
+                Email = model.Email,
+                UserName = model.Name,
+                UserRoll = UserRoles.Customer,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                LoginId = model.LoginId,
+                UserStatus = AccountStatus.Active,
+                Address = model.Address,
+                City = model.City,
+                DateOfBirth = model.DateOfBirth.ToShortDateString(),
+                NomineeName = model.NomineeName,
+                NomineeRelation = model.NomineeRelation,
+                PinCode = model.PinCode,
+                PhoneNumber = model.MobileNumber,
+                State = model.State,
+                AgentCode = int.Parse(model.AgentCode)
+
+            };
+            var result = await this._userManager.CreateAsync(customer, model.Password);
+            if (!result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Not Created" });
+            }
+            if (!await this._roleManager.RoleExistsAsync(UserRoles.Customer))
+            {
+                await this._roleManager.CreateAsync(new IdentityRole(UserRoles.Customer));
+            }
+            if (await this._roleManager.RoleExistsAsync(UserRoles.Customer))
+            {
+                await this._userManager.AddToRoleAsync(customer, UserRoles.Customer);
+            }
+
+            return this.Ok(new Response { Message = "Customer Created Successfully", Status = "Success" });
         }
     }
 }
