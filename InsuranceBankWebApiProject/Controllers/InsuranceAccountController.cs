@@ -76,19 +76,51 @@ namespace InsuranceBankWebApiProject.Controllers
             return this.Ok(insuranceAccounts);
         }
 
+        //[HttpGet]
+        //[Route("{customerId}/GetInsuranceAccountByAccountId/{accountId}")]
+        //public async Task<IActionResult> GetInsuranceAccountByAccountId(string customerId, string accountId)
+        //{
+        //    //method will return the particular insurance account detail baded in customer and account ID
+        //    //will return one single insurance plan purchase details
+        //    List<InsuranceAccountShortDto> insuranceAccounts = new List<InsuranceAccountShortDto>();
+        //    var customer = await this._userManager.FindByIdAsync(customerId);
+        //    if (customer == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+        //    }
+        //    var account = this._insuranceAccountManager.GetAll().Find(x => x.CustomerId == customerId && x.AccountNumber == accountId);
+        //    if (account == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Insurance Account Not Found", Status = "Error" });
+        //    }
+        //    return this.Ok(new InsuranceAccountShortDto()
+        //    {
+        //        // AccountNumber = account.Id,
+        //        DateCreated = account.DateCreated,
+        //        InsuranceScheme = account.InsuranceScheme,
+        //        InsuranceType = account.InsuranceType,
+        //        InvestmentAmount = account.InvestmentAmount,
+        //        MaturityDate = account.MaturityDate,
+        //        PremiumType = account.PremiumType,
+        //        ProfitRatio = account.ProfitRatio,
+        //        TotalAmount = account.TotalAmount,
+        //        AccountNumber=account.AccountNumber
+        //    });
+        //}
         [HttpGet]
-        [Route("{customerId}/GetInsuranceAccountByAccountId/{accountId}")]
-        public async Task<IActionResult> GetInsuranceAccountByAccountId(string customerId, string accountId)
+        [Route("{accountId}/GetInsuranceAccountByAccountId")]
+        public async Task<IActionResult> GetInsuranceAccountByAccountId(string accountId)
         {
             //method will return the particular insurance account detail baded in customer and account ID
             //will return one single insurance plan purchase details
             List<InsuranceAccountShortDto> insuranceAccounts = new List<InsuranceAccountShortDto>();
-            var customer = await this._userManager.FindByIdAsync(customerId);
-            if (customer == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
-            }
-            var account = this._insuranceAccountManager.GetAll().Find(x => x.CustomerId == customerId && x.AccountNumber == accountId);
+            //var customer = await this._userManager.FindByIdAsync(customerId);
+            //if (customer == null)
+            //{
+            //    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            //}
+
+            var account = this._insuranceAccountManager.GetAll().Find(x => x.AccountNumber == accountId);
             if (account == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Insurance Account Not Found", Status = "Error" });
@@ -104,7 +136,9 @@ namespace InsuranceBankWebApiProject.Controllers
                 PremiumType = account.PremiumType,
                 ProfitRatio = account.ProfitRatio,
                 TotalAmount = account.TotalAmount,
-                AccountNumber=account.AccountNumber
+                AccountNumber = account.AccountNumber,
+                CustomerName=account.CustomerName,
+                CustomerId=account.CustomerId
             });
         }
     }

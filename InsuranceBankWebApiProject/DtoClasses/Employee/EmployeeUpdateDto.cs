@@ -4,8 +4,8 @@ namespace InsuranceBankWebApiProject.DtoClasses.Employee
 {
     public class EmployeeUpdateDto
     {
-        [Required(ErrorMessage ="Id Is Required")]
-        public string Id { get; set; }
+        //[Required(ErrorMessage ="Id Is Required")]
+        //public string Id { get; set; }
         [Required(ErrorMessage = "Name Is Required")]
         public string Name { get; set; }
         [Required(ErrorMessage = "LoginId Is Required")]

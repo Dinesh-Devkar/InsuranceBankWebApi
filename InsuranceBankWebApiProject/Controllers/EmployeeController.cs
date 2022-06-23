@@ -89,6 +89,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     Id = employee.Id,
                     Email = employee.Email,
                     LoginId = employee.LoginId,
+
                     Name = employee.UserName,
                     UserRoll = employee.UserRoll,
                     UserStatus = employee.UserStatus,
@@ -194,7 +195,23 @@ namespace InsuranceBankWebApiProject.Controllers
             var employee=await this._userManager.FindByIdAsync(employeeId);
             if(employee == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Employee Not Found" }); ;
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Employee Not Found" });
+            }
+            if(employee.Email != model.Email)
+            {
+                var isEmailExists=await this._userManager.FindByEmailAsync(model.Email);
+                if(isEmailExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
+                }
+            }
+            if(employee.LoginId != model.LoginId)
+            {
+                var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
+                if(isLoginIdExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
+                }
             }
             employee.Email = model.Email;
             employee.UserName = model.Name;

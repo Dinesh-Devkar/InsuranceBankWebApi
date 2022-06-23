@@ -19,6 +19,7 @@ using System.Drawing;
 using Microsoft.AspNetCore.Cors;
 using InsuranceBankWebApiProject.DtoClasses.Employee;
 using Microsoft.EntityFrameworkCore;
+using InsuranceBankWebApiProject.DtoClasses.Agent;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -217,5 +218,56 @@ namespace InsuranceBankWebApiProject.Controllers
             return employeesList;
         }
 
+        //[HttpPut]
+        //[Route("{agentCode}/UpdateAgent")]
+        //public async Task<IActionResult> UpdateAgent(string agentCode, UpdateAgentDto model)
+        //{
+        //    //Method For Update Agent Details Based On His UniqueAgent Code
+
+        //    var agent = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Agent && x.AgentCode == agentCode).FirstOrDefaultAsync();
+        //    if (agent == null)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
+        //    }
+        //    if (agent.AgentCode != model.AgentCode)
+        //    {
+        //        var isAgentCodeExists=await this._userManager.Users.Where(x=>x.AgentCode==model.AgentCode).FirstOrDefaultAsync();
+        //        if(isAgentCodeExists != null)
+        //        {
+        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Code Already Exists" });
+        //        }
+               
+        //    }
+        //    Debug.WriteLine(agent.Email);
+        //    Debug.WriteLine(model.Email);
+        //    if (agent.Email != model.Email)
+        //    {
+        //        var isEmailExists = await this._userManager.FindByEmailAsync(model.Email);
+        //        if (isEmailExists != null)
+        //        {
+        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
+        //        }
+        //    }
+        //    Debug.WriteLine(agent.LoginId);
+        //    Debug.WriteLine(model.LoginId);
+        //    if (agent.LoginId != model.LoginId)
+        //    {
+        //        var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
+        //        if (isLoginIdExists != null)
+        //        {
+        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
+        //        }
+        //    }
+        //    agent.AgentCode = model.AgentCode;
+        //    agent.Address = model.Address;
+        //    agent.Qualification = model.Qualification;
+        //    agent.Email = model.Email;
+        //    agent.UserStatus = model.Status;
+        //    agent.LoginId = model.LoginId;
+        //    agent.UserName = model.Name;
+
+        //    await this._userManager.UpdateAsync(agent);
+        //    return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
+        //}
     }
 }

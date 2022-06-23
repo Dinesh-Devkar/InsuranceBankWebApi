@@ -50,7 +50,7 @@ namespace InsuranceBankWebApiProject.Controllers
             var customerExists = await this._userManager.FindByEmailAsync(model.Email);
             if (customerExists != null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Already Exists" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Customer Already Exists With Given Email" });
             }
 
             var loginIdExists = this._userManager.Users.ToList().Find(x => x.LoginId == model.LoginId);
@@ -118,6 +118,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     NomineeName = customer.NomineeName,
                     NomineeRelation = customer.NomineeRelation,
                     Status = customer.UserStatus,
+                    CustomerId=customer.Id
 
                 });
             }
@@ -295,18 +296,22 @@ namespace InsuranceBankWebApiProject.Controllers
                         InsuranceAccountNumber=insuranceAccountNumber,
                         PaymentStatus = "Paid"
                     });
-                    await this._commissionRecordManager.Add(new CommissionRecord()
+                    if (agentName != null)
                     {
-                        AgentCode = model.AgentCode.ToString(),
-                        AgentName = agentName,
-                        CustomerId = model.CustomerId,
-                        CustomerName = model.CustomerName,
-                        InsuranceAccountId = insuranceAccountNumber,
-                        InsuranceScheme = model.InsuranceScheme,
-                        PurchasedDate = model.DateCreated,
-                        CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
+                        await this._commissionRecordManager.Add(new CommissionRecord()
+                        {
+                            AgentCode = model.AgentCode.ToString(),
+                            AgentName = agentName,
+                            CustomerId = model.CustomerId,
+                            CustomerName = model.CustomerName,
+                            InsuranceAccountId = insuranceAccountNumber,
+                            InsuranceScheme = model.InsuranceScheme,
+                            PurchasedDate = model.DateCreated,
+                            CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
 
-                    });
+                        });
+                    }
+                   
 
                     //}
                     //var insId =await this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.Id).FirstOrDefault();
@@ -361,7 +366,8 @@ namespace InsuranceBankWebApiProject.Controllers
                 Status = customer.UserStatus,
                 City=customer.City,
                 PinCode= customer.PinCode.ToString(),
-                State=customer.State
+                State=customer.State,
+                CustomerId=customer.Id
             });
         }
 
@@ -409,6 +415,7 @@ namespace InsuranceBankWebApiProject.Controllers
             customer.PinCode= model.PinCode;
             customer.LoginId= model.LoginId;
             customer.DateOfBirth = model.DateOfBirth;
+            customer.UserStatus = model.Status;
 
             await this._userManager.UpdateAsync(customer);
             return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
