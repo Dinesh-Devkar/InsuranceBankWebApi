@@ -28,6 +28,12 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
 
         }
 
+        public async Task Delete(T entity)
+        {
+             _dbEntity.Remove(entity);
+            await _bankDb.SaveChangesAsync().ConfigureAwait(true);
+        }
+
         public List<T> GetAll()
         {
             
@@ -44,5 +50,6 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
            _dbEntity.Update(entity);           
            await _bankDb.SaveChangesAsync();
         }
+
     }
 }

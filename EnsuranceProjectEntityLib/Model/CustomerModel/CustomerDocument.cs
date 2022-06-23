@@ -10,6 +10,7 @@ namespace EnsuranceProjectEntityLib.Model.CustomerModel
     {
         public int Id { get; set; }
         public string DocumentName { get; set; }
-        public int CustomerId { get; set; }
+        public string DocumentFile { get; set; }
+        public string CustomerId { get; set; }
     }
 }
