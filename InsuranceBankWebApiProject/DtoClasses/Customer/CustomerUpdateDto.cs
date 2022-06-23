@@ -28,7 +28,8 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
         public string Email { get; set; }
         [Required(ErrorMessage = "Nominee Relation Is Required")]
         public string NomineeRelation { get; set; }
-
+        [Required(ErrorMessage = "Status Is Required")]
+        public string Status { get; set; }
 
     }
 }

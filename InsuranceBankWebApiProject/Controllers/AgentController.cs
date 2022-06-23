@@ -159,7 +159,8 @@ namespace InsuranceBankWebApiProject.Controllers
                     LoginId = agent.LoginId,
                     Name = agent.UserName,
                     Qualification = agent.Qualification,
-                    Status = agent.UserStatus
+                    Status = agent.UserStatus,
+                    Id=agent.Id
 
                 });
             }
@@ -312,24 +313,47 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return this.Ok(commissionRecorsList);
         }
+
       
         [HttpPut]
-        [Route("{agentCode}/UpdateAgent")]
-        public async Task<IActionResult> UpdateAgent(int? agentCode,UpdateAgentDto model)
+        [Route("{agentId}/UpdateAgent")]
+        public async Task<IActionResult> UpdateAgent(string agentId, UpdateAgentDto model)
         {
             //Method For Update Agent Details Based On His UniqueAgent Code
 
-            var agent=await this._userManager.Users.Where(x=>x.UserRoll==UserRoles.Agent && x.AgentCode==agentCode).FirstOrDefaultAsync();
+            var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
             }
+            Debug.WriteLine(agent.AgentCode);
+            Debug.WriteLine(model.AgentCode);
+            if (agent.AgentCode != model.AgentCode)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code Provided" });
+            }
+            if(agent.Email != model.Email)
+            {
+                var isEmailExists = await this._userManager.FindByEmailAsync(model.Email);
+                if (isEmailExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
+                }
+            }
+            if (agent.LoginId != model.LoginId)
+            {
+                var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
+                if (isLoginIdExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
+                }
+            }
             agent.AgentCode = model.AgentCode;
-            agent.Address= model.Address;
-            agent.Qualification=model.Qualification;
-            agent.Email=model.Email;
+            agent.Address = model.Address;
+            agent.Qualification = model.Qualification;
+            agent.Email = model.Email;
             agent.UserStatus = model.Status;
-            agent.LoginId=model.LoginId;
+            agent.LoginId = model.LoginId;
             agent.UserName = model.Name;
 
             await this._userManager.UpdateAsync(agent);

@@ -67,7 +67,8 @@ namespace InsuranceBankWebApiProject.Controllers
                         UserName = user.UserName,
                         userId = user.Id,
                         userRoll = user.UserRoll,
-                        dateOfBirth = user.DateOfBirth
+                        dateOfBirth = user.DateOfBirth,
+                        status=user.UserStatus
 
                     });
                 }
@@ -77,7 +78,8 @@ namespace InsuranceBankWebApiProject.Controllers
                     expire = token.ValidTo,
                     UserName = user.UserName,
                     userId = user.Id,
-                    userRoll = user.UserRoll
+                    userRoll = user.UserRoll,
+                    status = user.UserStatus
                 });
 
             }

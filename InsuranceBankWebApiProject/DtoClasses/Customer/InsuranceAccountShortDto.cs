@@ -12,5 +12,6 @@
         public string DateCreated { get; set; }
         public string MaturityDate { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerId { get; set; }
     }
 }

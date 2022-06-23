@@ -2,7 +2,8 @@
 {
     public class AgentGetDto
     {
-       
+
+        public string Id { get; set; }
         public string Name { get; set; }
     
         public int AgentCode { get; set; }
