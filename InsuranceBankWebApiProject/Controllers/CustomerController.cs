@@ -29,6 +29,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         private readonly IAllRepository<Query> _queryManager;
+        private readonly IAllRepository<CustomerDocument> _documentManager;
         public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext bankInsuranceDb)
         {
             this._userManager = userManager;
@@ -38,6 +39,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._insuranceSchemeManager=new AllRepository<InsuranceScheme>(bankInsuranceDb);
             this._queryManager=new AllRepository<Query>(bankInsuranceDb);
             this._paymentManager=new AllRepository<Payment>(bankInsuranceDb);
+            this._documentManager = new AllRepository<CustomerDocument>(bankInsuranceDb);
         }
         [HttpPost]
         [Route("Register")]
@@ -523,6 +525,83 @@ namespace InsuranceBankWebApiProject.Controllers
 
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Query Not To Give Feedback Found", Status = "Error" });
+        }
+
+        [HttpPost]
+        [Route("{customerId}/AddDocument")]
+        public async Task<IActionResult> AddDocument(string customerId,CustomerAddDocumentDto model)
+        {
+            var customer =await this._userManager.FindByIdAsync(customerId);
+            if(customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+            var isDocumentExist=this._documentManager.GetAll().Where(x=>x.CustomerId == customerId && x.DocumentName==model.DocumentName).FirstOrDefault();
+            if(isDocumentExist != null)
+            {
+                isDocumentExist.DocumentName = model.DocumentName;
+                isDocumentExist.DocumentFile = model.DocumentFile;
+                isDocumentExist.CustomerId = customerId;
+                await this._documentManager.Update(isDocumentExist);
+                return this.Ok(new Response { Message = "Document Added Successfully", Status = "Success" });
+
+            }
+            await this._documentManager.Add(new CustomerDocument()
+            {
+                CustomerId = customerId,
+                DocumentFile = model.DocumentFile,
+                DocumentName = model.DocumentName,
+                
+            });
+
+            return this.Ok(new Response { Message = "Document Added Successfully", Status = "Success" });
+        }
+        [HttpGet]
+        [Route("{customerId}/GetDocuments")]
+        public async Task<IActionResult> GetDocuments(string customerId)
+        {
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+            List<CustomerGetDocumentDto> documents=new List<CustomerGetDocumentDto>();
+
+            var documentsList = this._documentManager.GetAll().Where(x=>x.CustomerId==customerId).ToList();
+            foreach (var document in documentsList)
+            {
+                documents.Add(new CustomerGetDocumentDto()
+                {
+                    DocumentFile = document.DocumentFile,
+                    DocumentName = document.DocumentName
+                });
+            }
+            return this.Ok(documents);
+        }
+
+        [HttpDelete]
+        [Route("{customerId}/DeleteDocument")]
+        public async Task<IActionResult> DeleteDocument(string customerId, CustomerAddDocumentDto model)
+        {
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+
+            var document = this._documentManager.GetAll().Where(x => x.CustomerId == customerId && x.DocumentName == model.DocumentName).FirstOrDefault();
+
+            if (document == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Given Document Not Found", Status = "Error" });
+            }
+            //document.DocumentFile = model.DocumentFile;
+            //document.DocumentName = model.DocumentName;
+
+            //await this._documentManager.Update(document);
+            this._documentManager.Delete(document);
+            return this.Ok(new Response { Message = "Document Added Successfully", Status = "Success" });
+
         }
     }
 }

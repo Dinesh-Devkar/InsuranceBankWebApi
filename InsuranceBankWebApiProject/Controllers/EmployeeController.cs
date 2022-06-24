@@ -2,6 +2,7 @@
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
+using InsuranceBankWebApiProject.DtoClasses.Customer;
 using InsuranceBankWebApiProject.DtoClasses.Employee;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -220,6 +221,36 @@ namespace InsuranceBankWebApiProject.Controllers
             employee.LoginId= model.LoginId;
 
             await this._userManager.UpdateAsync(employee);
+            return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
+        }
+        [HttpPut]
+        [Route("{customerId}/UpdateCustomer")]
+        public async Task<IActionResult> UpdateCustomer(string customerId, CustomerUpdateDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "All Fields Are Required", Status = "Error" });
+            }
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+
+            customer.UserName = model.Name;
+            customer.State = model.State;
+            customer.Email = model.Email;
+            customer.Address = model.Address;
+            customer.City = model.City;
+            customer.PhoneNumber = model.MobileNumber;
+            customer.NomineeName = model.NomineeName;
+            customer.NomineeRelation = model.NomineeRelation;
+            customer.PinCode = model.PinCode;
+            customer.LoginId = model.LoginId;
+            customer.DateOfBirth = model.DateOfBirth;
+            customer.UserStatus = model.Status;
+
+            await this._userManager.UpdateAsync(customer);
             return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
         }
     }

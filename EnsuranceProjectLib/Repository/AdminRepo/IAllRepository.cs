@@ -12,6 +12,7 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
         List<T> GetAll();
         Task Update(T entity);
         Task<T> GetById(int entityId);
+        Task Delete(T entity);
 
     }
 }
