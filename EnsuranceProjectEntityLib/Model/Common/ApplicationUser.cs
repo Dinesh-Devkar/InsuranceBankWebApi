@@ -23,7 +23,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public int? AgentCode { get; set; }
         public string? UserRoll { get; set; }
         public string? Qualification { get; set; }
-       
+        public double? Balance { get; set; }
 
         public List<CustomerDocument> Documents { get; set; }
     }

@@ -447,5 +447,19 @@ namespace InsuranceBankWebApiProject.Controllers
 
             return this.Ok(new Response { Message = "Customer Created Successfully", Status = "Success" });
         }
+        [HttpGet]
+        [Route("{agentId}/GetBalance")]
+        public async Task<IActionResult> GetBalance(string agentId)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found With Given Id" });
+            }
+
+            var balance = await this._userManager.Users.Where(x => x.Id == agentId).Select(x => x.Balance).FirstOrDefaultAsync();
+            return this.Ok(balance);
+        }
+        
     }
 }

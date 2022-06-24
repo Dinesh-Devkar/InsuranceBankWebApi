@@ -312,6 +312,10 @@ namespace InsuranceBankWebApiProject.Controllers
                             CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
 
                         });
+                        //If Commission Added Successfully in Database Then agent balance will be updated  with addition commission amount
+                        agentCodeExists.Balance += (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100;
+                        await this._userManager.UpdateAsync(agentCodeExists);
+
                     }
                    
 
