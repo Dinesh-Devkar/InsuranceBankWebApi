@@ -28,6 +28,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         private readonly IAllRepository<CommissionRecord> _commissionRecordManager;
+        private readonly IAllRepository<AgentTransaction> _agentTransactionManager;
 
         public AgentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration,BankInsuranceDbContext dbContext)
         {
@@ -36,6 +37,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._roleManager = roleManager;
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(dbContext);
             this._commissionRecordManager = new AllRepository<CommissionRecord>(dbContext);
+            this._agentTransactionManager=new AllRepository<AgentTransaction>(dbContext);
         }
         [HttpPost]
         [Route("Register")]
@@ -461,5 +463,62 @@ namespace InsuranceBankWebApiProject.Controllers
             return this.Ok(balance);
         }
         
+        [HttpPost]
+        [Route("{agentId}/Withdraw")]
+        public async Task<IActionResult> Withdraw(string agentId,AgentTransactionDto model)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found With Given Id" });
+            }
+
+            var balance = await this._userManager.Users.Where(x => x.Id == agentId).Select(x => x.Balance).FirstOrDefaultAsync();
+            if(model.Amount < 0)
+            {
+                return this.Ok(new Response { Message = "Invalid Balance", Status = "Error" });
+            }
+            if(balance < model.Amount)
+            {
+                return this.Ok(new Response { Message = "Insufficient Balance", Status = "Error" });
+            }
+            if (model.Amount < balance)
+            {
+                agent.Balance -= model.Amount;
+                await this._userManager.UpdateAsync(agent);
+                await this._agentTransactionManager.Add(new AgentTransaction()
+                {
+                    AgentId = agentId,
+                    Amount = model.Amount,
+                    TransactionDate=DateTime.Now.ToShortDateString(),
+                    TransactionType = "Withdraw"
+                });
+                return this.Ok(new Response { Message = "Transaction Successfull", Status = "Success" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Transaction Unsuccessfull" });
+        }
+        [HttpGet]
+        [Route("{agentId}/GetTransactions")]
+        public async Task<IActionResult> GetTransactions(string agentId)
+        {
+            var agent = await this._userManager.FindByIdAsync(agentId);
+            if (agent == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found With Given Id" });
+            }
+            var transactionsList = new List<AgentTransactionGetDto>();
+            var transactions=this._agentTransactionManager.GetAll().Where(x=>x.AgentId == agentId).ToList();
+            foreach (var transaction in transactions)
+            {
+                transactionsList.Add(new AgentTransactionGetDto()
+                {
+                    AgentId = transaction.AgentId,
+                    Amount = transaction.Amount,
+                    TransactionDate = transaction.TransactionDate,
+                    TransactionType = transaction.TransactionType
+                });
+            }
+            return this.Ok(transactionsList);
+        }
     }
 }

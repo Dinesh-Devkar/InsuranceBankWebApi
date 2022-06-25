@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    partial class BankInsuranceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220624164336_AddedAgentTransactionsTable")]
+    partial class AddedAgentTransactionsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,10 +84,6 @@ namespace EnsuranceProjectLib.Migrations
 
                     b.Property<double>("Amount")
                         .HasColumnType("float");
-
-                    b.Property<string>("TransactionDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()

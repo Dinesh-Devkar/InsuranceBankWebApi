@@ -15,6 +15,7 @@ using Microsoft.Owin;
 using System.Transactions;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
+using InsuranceBankWebApiProject.DtoClasses.Payment;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -410,6 +411,22 @@ namespace InsuranceBankWebApiProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
             }
 
+            if(customer.Email != model.Email)
+            {
+                var isEmailExists = await this._userManager.FindByEmailAsync(model.Email);
+                if (isEmailExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
+                }
+            }
+            if (customer.LoginId != model.LoginId)
+            {
+                var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
+                if (isLoginIdExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
+                }
+            }
             customer.UserName = model.Name;
             customer.State=model.State;
             customer.Email = model.Email;
@@ -478,7 +495,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 queryList.Add(new GetQueryDto()
                 {
-                    ContactDate = DateTime.Now.ToShortDateString(),
+                    ContactDate = query.ContactDate,
                     CustomerName = query.CustomerName,
                     Message = query.Message,
                     Reply = query.Reply,
@@ -606,6 +623,35 @@ namespace InsuranceBankWebApiProject.Controllers
             this._documentManager.Delete(document);
             return this.Ok(new Response { Message = "Document Added Successfully", Status = "Success" });
 
+        }
+
+        [HttpPost]
+        [Route("{customerId}/DoPayment")]
+        public async Task<IActionResult> DoPayment(string customerId,PaymentAddDto model)
+        {
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "All Fields Are Required", Status = "Error" });
+            }
+
+            var payment = new Payment()
+            {
+                CustomerId = model.CustomerId,
+                InstallmentAmount = model.InstallmentAmount,
+                InstallmentDate = model.InstallmentDate,
+                InstallmentNumber = model.InstallmentNumber,
+                InsuranceAccountNumber = model.InsuranceAccountNumber,
+                PaidDate = model.PaidDate,
+                PaymentStatus = "Paid"
+            };
+            await this._paymentManager.Add(payment);
+            return this.Ok(new Response { Message = "Payment Done Successfully", Status = "Success" });
         }
     }
 }

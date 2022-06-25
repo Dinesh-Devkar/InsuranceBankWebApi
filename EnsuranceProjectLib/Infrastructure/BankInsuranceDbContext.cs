@@ -46,6 +46,7 @@ namespace EnsuranceProjectLib.Infrastructure
         public DbSet<InsuranceAccount> InsuranceAccounts { get; set;}
         public DbSet<CommissionRecord> CommissionRecords { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<AgentTransaction> AgentTransactions { get; set; }
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer(@"server=.\sqlexpress;database=BankInsurance;trusted_connection=true");
