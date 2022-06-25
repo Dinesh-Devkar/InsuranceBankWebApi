@@ -11,6 +11,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
     public class ApplicationUser : IdentityUser
     {
         public string? LoginId { get; set; }
+
         public string? UserStatus { get; set; }
         public string? DateOfBirth { get; set; }
         public string? Address { get; set; }
@@ -22,6 +23,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public int? AgentCode { get; set; }
         public string? UserRoll { get; set; }
         public string? Qualification { get; set; }
+        public double? Balance { get; set; }
 
         public List<CustomerDocument> Documents { get; set; }
     }

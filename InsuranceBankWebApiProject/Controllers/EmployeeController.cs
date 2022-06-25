@@ -236,7 +236,22 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
             }
-
+            if (customer.Email != model.Email)
+            {
+                var isEmailExists = await this._userManager.FindByEmailAsync(model.Email);
+                if (isEmailExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
+                }
+            }
+            if (customer.LoginId != model.LoginId)
+            {
+                var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
+                if (isLoginIdExists != null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
+                }
+            }
             customer.UserName = model.Name;
             customer.State = model.State;
             customer.Email = model.Email;
