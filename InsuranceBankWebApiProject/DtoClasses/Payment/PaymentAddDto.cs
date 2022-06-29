@@ -16,5 +16,9 @@ namespace InsuranceBankWebApiProject.DtoClasses.Payment
         public string CustomerId { get; set; }
         [Required(ErrorMessage ="Insurance Account Number Is Required")]
         public string InsuranceAccountNumber { get; set; }
+        [Required(ErrorMessage = "Customer Name Is Required")]
+        public string CustomerName { get; set; }
+        [Required(ErrorMessage = "Insurance Scheme Is Required")]
+        public string InsuranceScheme { get; set; }
     }
 }

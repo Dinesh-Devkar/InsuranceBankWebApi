@@ -161,3 +161,4 @@ D:\MVCPractice\Backup\BankEnsuranceSolution\InsuranceBankWebApiProject\bin\Debug
 D:\MVCPractice\Backup\BankEnsuranceSolution\InsuranceBankWebApiProject\obj\Debug\net6.0\InsuranceBankWebApiProject.csproj.ResolveComReference.cache
 D:\MVCPractice\Backup\BankEnsuranceSolution\InsuranceBankWebApiProject\bin\Debug\net6.0\Microsoft.Owin.dll
 D:\MVCPractice\Backup\BankEnsuranceSolution\InsuranceBankWebApiProject\bin\Debug\net6.0\Microsoft.Owin.Host.SystemWeb.dll
+D:\MVCPractice\Backup\BankEnsuranceSolution\InsuranceBankWebApiProject\bin\Debug\net6.0\InsuranceBankWebApiProject.staticwebassets.runtime.json

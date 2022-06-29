@@ -17,5 +17,6 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public double CommissionAmount { get; set; }
         public string AgentCode { get; set; }
         public string CustomerId { get; set; }
+        public string CommissionType { get; set; }
     }
 }

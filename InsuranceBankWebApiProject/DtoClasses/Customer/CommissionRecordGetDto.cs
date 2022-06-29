@@ -8,5 +8,6 @@
         public string AgentName { get; set; }
         public string PurchasedDate { get; set; }
         public double CommissionAmount { get; set; }
+        public string CommissionType { get; set; }
     }
 }
