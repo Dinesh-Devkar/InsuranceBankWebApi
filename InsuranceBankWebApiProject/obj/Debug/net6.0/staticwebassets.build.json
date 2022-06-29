@@ -1,11 +1,54 @@
 {
   "Version": 1,
-  "Hash": "/b0HVxhuJEdiDOR72gXRn+PzDY2PN8qOE6sUrA2JhbU=",
+  "Hash": "Tro2LyZRxOS/2D2j8biEwIoqSlI4MwFcF8AO8aWAakI=",
   "Source": "InsuranceBankWebApiProject",
   "BasePath": "_content/InsuranceBankWebApiProject",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "InsuranceBankWebApiProject\\wwwroot",
+      "Source": "InsuranceBankWebApiProject",
+      "ContentRoot": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\wwwroot\\",
+      "BasePath": "_content/InsuranceBankWebApiProject",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\wwwroot\\images\\019a372c-ae9f-4ffa-abec-397c627fe031_architecture-and-city.png",
+      "SourceId": "InsuranceBankWebApiProject",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\wwwroot\\",
+      "BasePath": "_content/InsuranceBankWebApiProject",
+      "RelativePath": "images/019a372c-ae9f-4ffa-abec-397c627fe031_architecture-and-city.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\019a372c-ae9f-4ffa-abec-397c627fe031_architecture-and-city.png"
+    },
+    {
+      "Identity": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\wwwroot\\images\\76f1454b-fcab-4f96-989c-15d601f52eac_plan.png",
+      "SourceId": "InsuranceBankWebApiProject",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\InsuranceBankWebApiProject\\wwwroot\\",
+      "BasePath": "_content/InsuranceBankWebApiProject",
+      "RelativePath": "images/76f1454b-fcab-4f96-989c-15d601f52eac_plan.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\76f1454b-fcab-4f96-989c-15d601f52eac_plan.png"
+    }
+  ]
 }

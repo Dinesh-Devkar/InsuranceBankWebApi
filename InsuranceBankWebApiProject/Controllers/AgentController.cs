@@ -310,7 +310,8 @@ namespace InsuranceBankWebApiProject.Controllers
                     CustomerName = commissionRecord.CustomerName,
                     InsuranceAccountId = commissionRecord.InsuranceAccountId,
                     InsuranceScheme = commissionRecord.InsuranceScheme,
-                    PurchasedDate = commissionRecord.PurchasedDate
+                    PurchasedDate = commissionRecord.PurchasedDate,
+                    CommissionType=commissionRecord.CommissionType
                 });
             }
             return this.Ok(commissionRecorsList);
@@ -371,6 +372,7 @@ namespace InsuranceBankWebApiProject.Controllers
             var commissionRecords = this._commissionRecordManager.GetAll();
             foreach(var commissionRecord in commissionRecords)
             {
+               
                 commissions.Add(new CommissionRecordGetDto()
                 {
                     AgentName = commissionRecord.AgentName,
@@ -378,7 +380,8 @@ namespace InsuranceBankWebApiProject.Controllers
                     CustomerName = commissionRecord.CustomerName,
                     InsuranceAccountId = commissionRecord.InsuranceAccountId,
                     InsuranceScheme = commissionRecord.InsuranceScheme,
-                    PurchasedDate = commissionRecord.PurchasedDate
+                    PurchasedDate = commissionRecord.PurchasedDate,
+                    CommissionType=commissionRecord.CommissionType
                 });
             }
             return  this.Ok(commissions);

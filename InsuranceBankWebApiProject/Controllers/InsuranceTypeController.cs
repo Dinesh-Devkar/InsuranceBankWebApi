@@ -1,10 +1,14 @@
-﻿using EnsuranceProjectEntityLib.Model.Insurance;
+﻿using EnsuranceProjectEntityLib.Model.Common;
+using EnsuranceProjectEntityLib.Model.Insurance;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace InsuranceBankWebApiProject.Controllers
@@ -14,16 +18,23 @@ namespace InsuranceBankWebApiProject.Controllers
     public class InsuranceTypeController : ControllerBase
     {
         private readonly IAllRepository<InsuranceType> _insuranceTypeManager;
-        public InsuranceTypeController(BankInsuranceDbContext bankInsuranceDb)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public InsuranceTypeController(BankInsuranceDbContext bankInsuranceDb,IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             this._insuranceTypeManager = new AllRepository<InsuranceType>(bankInsuranceDb);
+            this._webHostEnvironment = webHostEnvironment;
+            this._userManager = userManager;
+            this._httpContextAccessor = httpContextAccessor;
         }
         [HttpGet]
         [Route("GetAllInsuranceTypes")]
         public async Task<List<InsuranceTypeGetDto>> GetAllInsuranceTypes()
         {
             List<InsuranceTypeGetDto> insuranceTypeList = new List<InsuranceTypeGetDto>();
-            var insuranceTypes = this._insuranceTypeManager.GetAll();
+            var insuranceTypes = this._insuranceTypeManager.GetAll().Where(x=>x.Status=="Active");
+            
             foreach (var insuranceType in insuranceTypes)
             {
                 //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
@@ -32,14 +43,45 @@ namespace InsuranceBankWebApiProject.Controllers
                 //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
                 //    insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
                 //}
-                insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = insuranceType.Image, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
+                insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = insuranceType.Image, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status,Id=insuranceType.Id });
             }
             return insuranceTypeList;
         }
-
+        [HttpGet]
+        [Route("{userId}/GetAllInsuranceTypesForAdmin")]
+        public async Task<IActionResult> GetAllInsuranceTypesForAdmin(string userId)
+        {
+            List<InsuranceTypeGetDto> insuranceTypeList = new List<InsuranceTypeGetDto>();
+            dynamic insuranceTypes = null;
+            var user = await this._userManager.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
+            }
+            if (user.UserRoll == UserRoles.Admin || user.UserRoll == UserRoles.Employee)
+            {
+                insuranceTypes = this._insuranceTypeManager.GetAll();
+            }
+            //else
+            //{
+            //    insuranceTypes = (List<InsuranceTypeGetDto>?)this._insuranceTypeManager.GetAll().Where(x => x.Status == "Active");
+            //}
+            foreach (var insuranceType in insuranceTypes)
+            {
+                //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
+                //{
+                //    stream.Position = 0;
+                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
+                //    insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
+                //}
+                insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = insuranceType.Image, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status, Id = insuranceType.Id });
+            }
+            return this.Ok(insuranceTypeList);
+        }
         [HttpPost]
         [Route("AddInsuranceType")]
-        public async Task<IActionResult> AddInsuranceType([FromBody] InsuranceTypeAddDto model)
+        //[Consumes("multipart/form-data")]
+        public async Task<IActionResult> AddInsuranceType(InsuranceTypeAddDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -55,8 +97,12 @@ namespace InsuranceBankWebApiProject.Controllers
                 using (var stream = new MemoryStream())
                 {
                     //await model.Image.CopyTo(stream);
+                    //string folder = "images/";
+                    //folder += Guid.NewGuid().ToString() + "_" + model.Image.FileName;
+                    //string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+                    //await model.Image.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
                     await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status,Image=model.Image });
-                    // model.Image = stream.ToArray();
+                    //// model.Image = stream.ToArray();
                     return this.Ok(new Response { Message = "InsuranceType Added Successfully", Status = "Success" });
                 }
             }
@@ -84,7 +130,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpPut]
         [Route("{insuranceTypeId}/UpdateInsuranceType")]
-        public async Task<IActionResult> UpdateInsuranceType([FromForm] InsuranceTypeAddDto model, int insuranceTypeId)
+        public async Task<IActionResult> UpdateInsuranceType(int insuranceTypeId,InsuranceTypeAddDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -119,5 +165,123 @@ namespace InsuranceBankWebApiProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceType Not Update" });
 
         }
+
+        [HttpGet]
+        [Route("{insuranceTypeId}/GetInsuranceType")]
+        public async Task<IActionResult> GetInsuranceType(string insuranceTypeId)
+        {
+            var insuranceType=this._insuranceTypeManager.GetAll().Where(x=>x.Id== int.Parse(insuranceTypeId)).FirstOrDefault();
+            if (insuranceType == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsuranceType Not Found" });
+            }
+
+            return this.Ok(new InsuranceTypeGetDto { Id=insuranceType.Id,Image=insuranceType.Image,InsuranceName=insuranceType.InsuranceName,Status=insuranceType.Status });
+        }
+        [HttpPost]
+        [Route("AddBook")]
+        public async Task<IActionResult> AddBook([FromForm] IFormFile model)
+        {
+            var form = Request.Form;
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest("Something Went Wrong Try Again");
+            //}
+
+            //foreach(var file in form.Files)
+            //{
+            //    return this.Ok("Image Added Successfully");
+            //}
+            if (model.Length != 0)
+            {
+                string folder = "images/";
+                folder += Guid.NewGuid().ToString() + "_" + model.FileName;
+                string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+                await model.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
+                return this.Ok("Image Added Successfully");
+            }
+            return BadRequest("Not Added Image");
+        }
+        [HttpPost]
+        [Route("UploadImage")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            string imageName = null;
+            var httpRequest = this._httpContextAccessor.HttpContext.Request;
+            //IFormFile file = Request.Form.Files.FirstOrDefault();
+            Debug.WriteLine("The Count IS : " + httpRequest);
+            //Debug.WriteLine(model.FileName);
+            Debug.WriteLine("The Caption Is : " + Request.Form.Files.GetFile("Image"));
+            var a = Request.Form.Files.Count;
+            Debug.WriteLine(HttpContext.Request.Form["Image"]);
+            Debug.WriteLine("The Count IS : " + a);
+            //Debug.WriteLine(file);
+            //Upload Image
+            var t=Request.Form.Keys.FirstOrDefault();
+            Debug.WriteLine(t.GetType());
+            var l = HttpContext.Request.Form.Files.GetFile("Image");
+            Debug.WriteLine(l);
+            try
+            
+            {
+                var postedFile = httpRequest.Form.Files.Count; // .Files["Image"].FileName;
+                Debug.WriteLine(postedFile);
+                Debug.WriteLine(postedFile);
+                //Create custom filename
+                //imageName = new String(Path.GetFileName(postedFile.FileName).Take(10).ToArray()).Replace(" ", "-");
+                //imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                //var filePath = HttpContext.Server.MapPath("~/Image/" + imageName);
+                //postedFile.SaveAs(filePath);
+
+
+                //string folder = "images/";
+                //folder += Guid.NewGuid().ToString() + "_" + postedFile.FileName;
+                //string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+                //await model.Image.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
+                
+                foreach (var formFile in  HttpContext.Request.Form.Files.ToList())
+                {
+                    if (formFile.Length > 0)
+                    {
+                        Debug.WriteLine(formFile);
+                    }
+                }
+
+                return this.Ok("Image Added Successfully");
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            //var postedFile = httpRequest.Form.Files["Image"];
+            //var postedFile = httpRequest.Form.Files[0];
+            //Create custom filename
+            //imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(10).ToArray()).Replace(" ", "-");
+            //imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+            //var filePath = HttpContext.Server.MapPath("~/Image/" + imageName);
+            //postedFile.SaveAs(filePath);
+
+            ////Save to DB
+            //using (DBModel db = new DBModel())
+            //{
+            //    Image image = new Image()
+            //    {
+            //        ImageCaption = httpRequest["ImageCaption"],
+            //        ImageName = imageName
+            //    };
+            //    db.Images.Add(image);
+            //    db.SaveChanges();
+            //}
+            //return Request.CreateResponse(HttpStatusCode.Created);
+           
+            return this.Ok("Image Uploaded");
+        }
+        //[Produces("application/json")]
+        //[HttpPost]
+        //public async Task<IActionResult> Upload(IFormFile file)
+        //{
+
+        //}
     }
 }

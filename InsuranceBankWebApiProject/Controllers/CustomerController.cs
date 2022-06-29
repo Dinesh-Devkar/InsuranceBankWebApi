@@ -310,6 +310,7 @@ namespace InsuranceBankWebApiProject.Controllers
                             InsuranceAccountId = insuranceAccountNumber,
                             InsuranceScheme = model.InsuranceScheme,
                             PurchasedDate = model.DateCreated,
+                            CommissionType="New Registration",
                             CommissionAmount = (this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
 
                         });
@@ -514,7 +515,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 queryList.Add(new GetQueryDto()
                 {
-                    ContactDate = DateTime.Now.ToShortDateString(),
+                    ContactDate = query.ContactDate,
                     CustomerName = query.CustomerName,
                     Message = query.Message,
                     Reply = query.Reply,
@@ -640,18 +641,68 @@ namespace InsuranceBankWebApiProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "All Fields Are Required", Status = "Error" });
             }
 
-            var payment = new Payment()
-            {
-                CustomerId = model.CustomerId,
-                InstallmentAmount = model.InstallmentAmount,
-                InstallmentDate = model.InstallmentDate,
-                InstallmentNumber = model.InstallmentNumber,
-                InsuranceAccountNumber = model.InsuranceAccountNumber,
-                PaidDate = model.PaidDate,
-                PaymentStatus = "Paid"
-            };
-            await this._paymentManager.Add(payment);
-            return this.Ok(new Response { Message = "Payment Done Successfully", Status = "Success" });
+           
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    try
+                    {
+                        var insuranceSchemeName = this._insuranceAccountManager.GetAll().Where(x => x.CustomerId == model.CustomerId).Select(x => x.InsuranceScheme).FirstOrDefault();
+                        var installmentCommission = this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == insuranceSchemeName).Select(x => x.InstallmentComission).FirstOrDefault();
+                        var agentCode = await this._userManager.Users.Where(x => x.Id == model.CustomerId).Select(x => x.AgentCode).FirstOrDefaultAsync();
+                        var agent = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Agent && x.AgentCode == agentCode).FirstOrDefaultAsync();
+                        if (agent == null)
+                        {
+                            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found With Given AgntCode" });
+                        }
+                        var payment = new Payment()
+                        {
+                            CustomerId = model.CustomerId,
+                            InstallmentAmount = model.InstallmentAmount,
+                            InstallmentDate = model.InstallmentDate,
+                            InstallmentNumber = model.InstallmentNumber,
+                            InsuranceAccountNumber = model.InsuranceAccountNumber,
+                            PaidDate = model.PaidDate,
+                            PaymentStatus = "Paid"
+                        };
+
+                        await this._paymentManager.Add(payment);
+                        if (agent != null)
+                        {
+                            await this._commissionRecordManager.Add(new CommissionRecord()
+                            {
+                                AgentCode = agentCode.ToString(),
+                                AgentName = agent.UserName,
+                                CustomerId = model.CustomerId,
+                                CustomerName = model.CustomerName,
+                                InsuranceAccountId = model.InsuranceAccountNumber,
+                                InsuranceScheme = model.InsuranceScheme,
+                                PurchasedDate = model.PaidDate,
+                                CommissionType = "Installment",
+                                CommissionAmount = (installmentCommission * model.InstallmentAmount) / 100 //(this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceSchemeName == model.InsuranceScheme && x.InsuranceTypeName == model.InsuranceType).Select(x => x.NewRegComission).FirstOrDefault() * model.InvestmentAmount) / 100
+
+                            });
+                            //If Commission Added Successfully in Database Then agent balance will be updated  with addition commission amount
+                            agent.Balance += (installmentCommission * model.InstallmentAmount) / 100;
+                            await this._userManager.UpdateAsync(agent);
+                            scope.Complete();
+                            return this.Ok(new Response { Message = "Payment Done Successfully", Status = "Success" });
+
+                        }
+
+                    }
+                    
+                    catch (Exception ex)
+                    {
+
+                        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Transaction Fail " + ex.Message });
+                    }
+                    
+               
+            }
+           
+        
+           return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong Transaction Fail" });
+          
         }
     }
 }

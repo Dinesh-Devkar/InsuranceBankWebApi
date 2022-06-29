@@ -34,10 +34,10 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
             await _bankDb.SaveChangesAsync().ConfigureAwait(true);
         }
 
-        public List<T> GetAll()
+        public  List<T> GetAll()
         {
             
-            return  _dbEntity.ToList();
+            return _dbEntity.ToList();
         }
 
         public async Task<T> GetById(int entityId)
@@ -51,5 +51,6 @@ namespace EnsuranceProjectLib.Repository.AdminRepo
            await _bankDb.SaveChangesAsync();
         }
 
+     
     }
 }
