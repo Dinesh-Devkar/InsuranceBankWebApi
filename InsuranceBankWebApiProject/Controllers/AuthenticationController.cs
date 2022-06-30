@@ -1,5 +1,6 @@
 ﻿using EnsuranceProjectEntityLib.Model.Common;
 using InsuranceBankWebApiProject.DtoClasses.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +17,7 @@ namespace InsuranceBankWebApiProject.Controllers
     [EnableCors()]
     public class AuthenticationController : ControllerBase
     {
+        //this controller have common action methods which will be used by all types of users
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         public AuthenticationController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
@@ -57,7 +59,7 @@ namespace InsuranceBankWebApiProject.Controllers
              //notBefore:
              signingCredentials: new SigningCredentials(authSignInKey, SecurityAlgorithms.HmacSha256));
 
-                //If logged in user is customer then will return his DateOfBirth Also
+                //If logged in user is customer then will return his DateOfBirth Also for age eligibility criteria
                 if (user.UserRoll == UserRoles.Customer)
                 {
                     return this.Ok(new
@@ -88,9 +90,11 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{userId}/ChangePassword")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent+","+UserRoles.Customer)]
         public async Task<IActionResult> ChangePassword(string userId, ChangePasswordModel model)
         {
             // This Change Password Method Is Common For All The User (Admin,Agent,Employee,customer)
+
             if (ModelState.IsValid)
             {
                 var userExist = await this._userManager.FindByIdAsync(userId);

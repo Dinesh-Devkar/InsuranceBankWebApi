@@ -204,7 +204,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("UploadImage")]
-        public async Task<IActionResult> UploadImage(IFormFile file)
+        public async Task<IActionResult> UploadImage()
         {
             string imageName = null;
             var httpRequest = this._httpContextAccessor.HttpContext.Request;

@@ -138,7 +138,9 @@ namespace InsuranceBankWebApiProject.Controllers
                 TotalAmount = account.TotalAmount,
                 AccountNumber = account.AccountNumber,
                 CustomerName=account.CustomerName,
-                CustomerId=account.CustomerId
+                CustomerId=account.CustomerId,
+                NumberOfInstallments=account.NumberOfInstallments,
+                PendingInstallments=account.PendingInstallments
             });
         }
     }
