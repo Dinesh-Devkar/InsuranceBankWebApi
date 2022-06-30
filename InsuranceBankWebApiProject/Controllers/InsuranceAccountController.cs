@@ -81,8 +81,8 @@ namespace InsuranceBankWebApiProject.Controllers
         }
 
         [HttpGet]
-        [Route("{accountId}/GetInsuranceAccountByAccountId")
-             [Authorize(Roles = UserRoles.Employee + "," + UserRoles.Admin + "," + UserRoles.Customer+","+UserRoles.Agent)]
+        [Route("{accountId}/GetInsuranceAccountByAccountId")]
+        [Authorize(Roles = UserRoles.Employee + "," + UserRoles.Admin + "," + UserRoles.Customer+","+UserRoles.Agent)]
         public async Task<IActionResult> GetInsuranceAccountByAccountId(string accountId)
         {
             //method will return the particular insurance account detail based on customer and account ID

@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllInsuranceTypes")]
         public async Task<List<InsuranceTypeGetDto>> GetAllInsuranceTypes()
         {
+            //Return a list of all insurance types which are active
             List<InsuranceTypeGetDto> insuranceTypeList = new List<InsuranceTypeGetDto>();
             var insuranceTypes = this._insuranceTypeManager.GetAll().Where(x=>x.Status=="Active");
             
@@ -49,8 +51,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{userId}/GetAllInsuranceTypesForAdmin")]
+        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<IActionResult> GetAllInsuranceTypesForAdmin(string userId)
         {
+            //return a list of all insurance type including active and inactive
             List<InsuranceTypeGetDto> insuranceTypeList = new List<InsuranceTypeGetDto>();
             dynamic insuranceTypes = null;
             var user = await this._userManager.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
@@ -62,10 +66,10 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 insuranceTypes = this._insuranceTypeManager.GetAll();
             }
-            //else
-            //{
-            //    insuranceTypes = (List<InsuranceTypeGetDto>?)this._insuranceTypeManager.GetAll().Where(x => x.Status == "Active");
-            //}
+            else
+            {
+                insuranceTypes = (List<InsuranceTypeGetDto>?)this._insuranceTypeManager.GetAll().Where(x => x.Status == "Active");
+            }
             foreach (var insuranceType in insuranceTypes)
             {
                 //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
@@ -81,8 +85,10 @@ namespace InsuranceBankWebApiProject.Controllers
         [HttpPost]
         [Route("AddInsuranceType")]
         //[Consumes("multipart/form-data")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> AddInsuranceType(InsuranceTypeAddDto model)
         {
+            //To add new insurance type
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -108,28 +114,10 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong InsuranceType Not Added" });
         }
-        [HttpGet]
-        [Route("GetSingleInsurance")]
-        public async Task<IActionResult> GetSingleInsurance()
-        {
-
-            var insuranceTypes = this._insuranceTypeManager.GetAll();
-            foreach (var insuranceType in insuranceTypes)
-            {
-                //using (MemoryStream stream = new MemoryStream(insuranceType.Image))
-                //{
-                //    stream.Position = 0;
-                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
-                //    return File(insuranceType.Image, "image/jpg", "Dinesh.jpg");
-                //    //return this.Ok(insuranceType.Image);
-                //    //insuranceTypeList.Add(new InsuranceTypeGetDto() { Image = returnImage, InsuranceName = insuranceType.InsuranceName, Status = insuranceType.Status });
-                //}
-            }
-            return this.Ok("Image Not Found");
-        }
 
         [HttpPut]
         [Route("{insuranceTypeId}/UpdateInsuranceType")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee)]
         public async Task<IActionResult> UpdateInsuranceType(int insuranceTypeId,InsuranceTypeAddDto model)
         {
             if (!ModelState.IsValid)
@@ -168,8 +156,10 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("{insuranceTypeId}/GetInsuranceType")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee)]
         public async Task<IActionResult> GetInsuranceType(string insuranceTypeId)
         {
+            //Get insurance type details by insuranceTypeId
             var insuranceType=this._insuranceTypeManager.GetAll().Where(x=>x.Id== int.Parse(insuranceTypeId)).FirstOrDefault();
             if (insuranceType == null)
             {
@@ -178,30 +168,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
             return this.Ok(new InsuranceTypeGetDto { Id=insuranceType.Id,Image=insuranceType.Image,InsuranceName=insuranceType.InsuranceName,Status=insuranceType.Status });
         }
-        [HttpPost]
-        [Route("AddBook")]
-        public async Task<IActionResult> AddBook([FromForm] IFormFile model)
-        {
-            var form = Request.Form;
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest("Something Went Wrong Try Again");
-            //}
-
-            //foreach(var file in form.Files)
-            //{
-            //    return this.Ok("Image Added Successfully");
-            //}
-            if (model.Length != 0)
-            {
-                string folder = "images/";
-                folder += Guid.NewGuid().ToString() + "_" + model.FileName;
-                string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
-                await model.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
-                return this.Ok("Image Added Successfully");
-            }
-            return BadRequest("Not Added Image");
-        }
+       
         [HttpPost]
         [Route("UploadImage")]
         public async Task<IActionResult> UploadImage()
@@ -277,11 +244,5 @@ namespace InsuranceBankWebApiProject.Controllers
            
             return this.Ok("Image Uploaded");
         }
-        //[Produces("application/json")]
-        //[HttpPost]
-        //public async Task<IActionResult> Upload(IFormFile file)
-        //{
-
-        //}
     }
 }

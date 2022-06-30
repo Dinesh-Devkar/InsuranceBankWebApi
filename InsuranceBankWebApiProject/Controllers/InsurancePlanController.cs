@@ -1,8 +1,10 @@
-﻿using EnsuranceProjectEntityLib.Model.Insurance;
+﻿using EnsuranceProjectEntityLib.Model.Common;
+using EnsuranceProjectEntityLib.Model.Insurance;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -26,6 +28,8 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllInsurancePlans")]
         public async Task<List<InsurancePlanGetDto>> GetAllInsurancePlans()
         {
+            //return a list of all insurance plans
+
             List<InsurancePlanGetDto> insurancePlansList = new List<InsurancePlanGetDto>();
             var insurancePlans = this._insurancePlanManager.GetAll();
             foreach (var insurancePlan in insurancePlans)
@@ -50,8 +54,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("AddInsurancePlan")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> AddInsurancePlan([FromBody] InsurancePlanAddDto model)
         {
+            //To add a new insurance plan
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -91,6 +97,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("{insurancePlanName}/GetInsurancePlan")]
         public async Task<IActionResult> GetInsurancePlan(string insurancePlanName)
         {
+            //get particular insurance plan details by insurance name
             var insurancePlan=this._insurancePlanManager.GetAll().Find(x=>x.InsurancePlanName == insurancePlanName);
             if (insurancePlan == null)
             {
@@ -114,8 +121,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{insurancePlanId}/UpdateInsurancePlan")]
+        [Authorize(Roles = UserRoles.Employee + "," + UserRoles.Admin)]
         public async Task<IActionResult> UpdateInsurancePlan(InsurancePlanAddDto model, int insurancePlanId)
         {
+            //To Update Insurance Plan
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -151,7 +160,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
 
         [HttpGet]
-        [Route("{insuranceType}/GetInsurancePlansByInsuranceType")]
+        [Route("{insuranceType}/GetInsurancePlansByInsuranceType")]   
         public async Task<IActionResult> GetInsurancePlansByInsuranceType(string insuranceType)
         {
             var insType=this._insuranceTypeManager.GetAll().Find(x=>x.InsuranceName==insuranceType);
@@ -162,11 +171,9 @@ namespace InsuranceBankWebApiProject.Controllers
             List<InsurancePlansPurchaseDto> insurancePlansList = new List<InsurancePlansPurchaseDto>();
             var insurancePlans = this._insurancePlanManager.GetAll().Where(x=>x.InsuranceType==insType.InsuranceName).ToList();
             foreach (var insurancePlan in insurancePlans)
-            {
-                
+            {               
                 insurancePlansList.Add(new InsurancePlansPurchaseDto()
-                {
-                 
+                {                 
                     InsuranceType = insurancePlan.InsuranceType,
                     InsuranceScheme = insurancePlan.InsuranceScheme,
                     InsurancePlanName = insurancePlan.InsurancePlanName,
@@ -178,7 +185,6 @@ namespace InsuranceBankWebApiProject.Controllers
                     MaximumInvestAmt = insurancePlan.MaximumInvestAmt,
                     ProfitRatio = insurancePlan.ProfitRatio,
                     Note=this._insuranceSchemeManager.GetAll().Where(x=>x.InsuranceSchemeName==insurancePlan.InsuranceScheme).Select(x=>x.Note).FirstOrDefault()
-
                 });
             }
             return this.Ok(insurancePlansList);
