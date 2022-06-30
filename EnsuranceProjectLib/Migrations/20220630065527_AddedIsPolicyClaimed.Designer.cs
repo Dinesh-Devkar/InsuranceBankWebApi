@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    partial class BankInsuranceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220630065527_AddedIsPolicyClaimed")]
+    partial class AddedIsPolicyClaimed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -361,9 +363,8 @@ namespace EnsuranceProjectLib.Migrations
                     b.Property<double>("InvestmentAmount")
                         .HasColumnType("float");
 
-                    b.Property<string>("IsPolicyClaimed")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsPolicyClaimed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MaturityDate")
                         .IsRequired()
@@ -377,10 +378,6 @@ namespace EnsuranceProjectLib.Migrations
 
                     b.Property<int>("PendingInstallments")
                         .HasColumnType("int");
-
-                    b.Property<string>("PolicyStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PremiumType")
                         .IsRequired()

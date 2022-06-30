@@ -15,5 +15,6 @@
         public string CustomerId { get; set; }
         public int NumberOfInstallments { get; set; }
         public int PendingInstallments { get; set; }
+        public string PolicyStatus { get; set; }
     }
 }
