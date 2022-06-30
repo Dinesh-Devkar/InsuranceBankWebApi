@@ -1,7 +1,9 @@
 ﻿using EnsuranceProjectEntityLib.Model.AdminModel;
+using EnsuranceProjectEntityLib.Model.Common;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -19,27 +21,24 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("AddState")]
+        [Authorize(UserRoles.Admin)]
         public async Task<IActionResult> AddState([FromBody] StateAddDto model)
         {
-            Debug.WriteLine("Inside Add State");
+            //To add a new State
             if (!ModelState.IsValid)
             {
-                Debug.WriteLine("Inside Model State");
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
             }
             if (model.StateName.Length == 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
             }
-            Debug.WriteLine("Outside IF Condition");
-            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
+            
             var isStateExist = this._stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
             if (isStateExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "State Already Exists" });
             }
-            //_bankInsuranceDbContext.States.Add(new State() { StateName = model.StateName,Status=model.Status});
-            //_bankInsuranceDbContext.SaveChanges();
             await this._stateManager.Add(new State() { StateName = model.StateName, Status = model.Status });
             return this.Ok(new Response { Message = "State Added Successfully", Status = "Success" });
         }
@@ -47,16 +46,15 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpPut]
         [Route("UpdateState")]
+        [Authorize(Roles = UserRoles.Employee + "," + UserRoles.Admin)]
         public async Task<IActionResult> UpdateState([FromBody] StateAddDto model)
         {
-            Debug.WriteLine("Inside Add State");
+           //To update a state
             if (!ModelState.IsValid)
             {
-                Debug.WriteLine("Inside Model State");
+               
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields are Required" });
             }
-            Debug.WriteLine("Outside IF Condition");
-            //var isStateExist = _bankInsuranceDbContext.States.ToList().Find(x=>x.StateName==model.StateName);
             var isStateExist = this._stateManager.GetAll().ToList().Find(x => x.StateName == model.StateName);
             if (isStateExist != null)
             {
@@ -78,6 +76,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllStates")]
         public async Task<List<State>> GetAllStates()
         {
+            //Return a list of all states
             return this._stateManager.GetAll();
         }
     }

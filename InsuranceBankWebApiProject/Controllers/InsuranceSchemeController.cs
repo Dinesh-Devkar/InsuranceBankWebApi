@@ -1,8 +1,10 @@
-﻿using EnsuranceProjectEntityLib.Model.Insurance;
+﻿using EnsuranceProjectEntityLib.Model.Common;
+using EnsuranceProjectEntityLib.Model.Insurance;
 using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Insurance;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
@@ -24,14 +26,11 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("GetAllInsuranceSchemes")]
         public async Task<List<InsuranceSchemeGetDto>> GetAllInsuranceSchemes()
         {
+            //Return a list of all insurance schemes
             List<InsuranceSchemeGetDto> insuranceSchemeList = new List<InsuranceSchemeGetDto>();
             var insuranceSchemes = this._insuranceSchemeManager.GetAll();
             foreach (var insuranceScheme in insuranceSchemes)
             {
-                //using (MemoryStream stream = new MemoryStream(insuranceScheme.Image))
-                //{
-                //    stream.Position = 0;
-                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
                 insuranceSchemeList.Add(new InsuranceSchemeGetDto()
                 {
                     Image = insuranceScheme.Image,
@@ -50,14 +49,11 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("{insuranceType}/GetInsuranceSchemesByInsuranceType")]
         public async Task<List<InsuranceSchemeGetDto>> GetInsuranceSchemesByInsuranceType(string insuranceType)
         {
+            //Return a list of insurance schemes by insurance type
             List<InsuranceSchemeGetDto> insuranceSchemeList = new List<InsuranceSchemeGetDto>();
             var insuranceSchemes = this._insuranceSchemeManager.GetAll().Where(x => x.InsuranceTypeName == insuranceType).ToList();
             foreach (var insuranceScheme in insuranceSchemes)
             {
-                //using (MemoryStream stream = new MemoryStream(insuranceScheme.Image))
-                //{
-                //    stream.Position = 0;
-                //    Bitmap returnImage = (Bitmap)Image.FromStream(stream, true);
                 insuranceSchemeList.Add(new InsuranceSchemeGetDto()
                 {
                     Image = insuranceScheme.Image,
@@ -74,8 +70,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("AddInsuranceScheme")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> AddInsuranceScheme([FromBody] InsuranceSchemeAddDto model)
         {
+            //To add a new insurance scheme
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -94,9 +92,6 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 using (var stream = new MemoryStream())
                 {
-                    //await model.Image.CopyToAsync(stream);
-                    //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
-                    // model.Image = stream.ToArray();
                     await this._insuranceSchemeManager.Add(new InsuranceScheme()
                     {
                         InsuranceTypeName = model.InsuranceTypeName,
@@ -114,8 +109,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{insuranceSchemeId}/UpdateInsuranceScheme")]
+        [Authorize(Roles = UserRoles.Employee + "," + UserRoles.Admin)]
         public async Task<IActionResult> UpdateInsuranceScheme(int insuranceSchemeId,InsuranceSchemeAddDto model)
         {
+            //To update a insurance scheme
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -140,20 +137,6 @@ namespace InsuranceBankWebApiProject.Controllers
                 insuranceScheme.NewRegComission = model.NewRegComission;
                 insuranceScheme.Image=model.Image;
                 insuranceScheme.Note=model.Note;
-                
-
-                //var newImage = insuranceScheme.Image;
-                //if (model.Image.Length > 0)
-                //{
-                //    using (var stream = new MemoryStream())
-                //    {
-                //        //await model.Image.CopyToAsync(stream);
-                //        //await this._insuranceTypeManager.Add(new InsuranceType() { InsuranceName = model.InsuranceName, Status = model.Status, Image = stream.ToArray() });
-                //        // model.Image = stream.ToArray();
-                //        //newImage = stream.ToArray();
-
-                //    }
-                //}
                 await this._insuranceTypeManager.Update(insuranceType);
 
                 return this.Ok(new Response { Message = "InsuranceScheme Updated Successfully", Status = "Success" });
@@ -165,6 +148,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [Route("{insuranceSchemeName}/GetInsuranceSchemeDetails")]
         public async Task<IActionResult> GetInsuranceSchemeDetails(string insuranceSchemeName)
         {
+            //Return a insurance scheme details by insurance scheme name
             var insuranceScheme=this._insuranceSchemeManager.GetAll().Find(x=>x.InsuranceSchemeName==insuranceSchemeName);
             if (insuranceScheme == null)
             {

@@ -212,7 +212,9 @@ namespace InsuranceBankWebApiProject.Controllers
                             TotalAmount = model.TotalAmount,
                             AccountNumber=insuranceAccountNumber,
                             NumberOfInstallments = model.NumberOfInstallments,
-                            PendingInstallments=model.NumberOfInstallments-1
+                            PendingInstallments=model.NumberOfInstallments-1,
+                            IsPolicyClaimed="False",
+                            PolicyStatus=PolicyStatus.Pending
                         };
 
                     await this._insuranceAccountManager.Add(insuranceAccount);
@@ -617,8 +619,15 @@ namespace InsuranceBankWebApiProject.Controllers
                             //If Commission Added Successfully in Database Then agent balance will be updated  with addition commission amount
                             agent.Balance += (installmentCommission * model.InstallmentAmount) / 100;
                             await this._userManager.UpdateAsync(agent);
-                            scope.Complete();
-                            return this.Ok(new Response { Message = "Payment Done Successfully", Status = "Success" });
+
+                            //If all installments are done then policy claim will be true thwn customer is able to claim the policy
+                            if (model.InstallmentNumber == insuranceAccount.NumberOfInstallments)
+                            {
+                                insuranceAccount.IsPolicyClaimed = "True";
+                                await this._insuranceAccountManager.Update(insuranceAccount);
+                            }
+                                scope.Complete();
+                                return this.Ok(new Response { Message = "Payment Done Successfully", Status = "Success" });
                         }
                     }                   
                     catch (Exception ex)
@@ -629,6 +638,27 @@ namespace InsuranceBankWebApiProject.Controllers
                 }        
            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Something Went Wrong Transaction Fail" });
           
+        }
+        [HttpPut]
+        [Route("{customerId}/PolicyClaimRequest")]
+        [Authorize(Roles =UserRoles.Customer)]
+        public async Task<IActionResult> PolicyClaimRequest(string customerId,PolicyClaimRequestDto model)
+        {
+            //If all the installments are done then customer can claim the policy request
+            var customer = await this._userManager.FindByIdAsync(customerId);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Customer Not Found", Status = "Error" });
+            }
+            var account = this._insuranceAccountManager.GetAll().Find(x => x.AccountNumber == model.InsuranceAccountNumber);
+            if (account == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "Insurance Account Not Found", Status = "Error" });
+            }
+
+            account.PolicyStatus = PolicyStatus.Requested;
+            await this._insuranceAccountManager.Update(account);
+            return this.Ok(new Response { Message = "Your Insurance Policy Claimed Is Requested Successfully You Will Receive A Response In Next 24 Hours", Status = "Success" });
         }
     }
 }

@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Customer;
 using InsuranceBankWebApiProject.DtoClasses.Employee;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,18 +33,20 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
+        [Authorize(Roles =UserRoles.Employee)]
         public async Task<IActionResult> Register([FromBody] EmployeeAddDto model)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
             }
+            //Check is email already exists
             var employeeExist = await this._userManager.FindByEmailAsync(model.Email);
             if (employeeExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Employee Already Exists" });
             }
-            //var loginIdExists = this._employeeManager.GetAll().Find(x => x.LoginId == model.LoginId);
+            //Check is loginId already exists
             var loginIdExists = this._userManager.Users.ToList().Find(x => x.LoginId == model.LoginId);
 
             if (loginIdExists != null)
@@ -78,10 +81,12 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllEmployees")]
+        [Authorize(Roles = UserRoles.Employee)]
         public async Task<List<EmployeeGetDto>> GetAllEmployees()
         {
+            //Return a list of all the employees
+
             List<EmployeeGetDto> employeesList = new List<EmployeeGetDto>();
-            //var employees = this._employeeManager.GetAll().Where(x=>x.UserRoll==UserRoles.Employee);
             var employees = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Employee).ToListAsync();
             foreach (var employee in employees)
             {
@@ -90,20 +95,21 @@ namespace InsuranceBankWebApiProject.Controllers
                     Id = employee.Id,
                     Email = employee.Email,
                     LoginId = employee.LoginId,
-
                     Name = employee.UserName,
                     UserRoll = employee.UserRoll,
                     UserStatus = employee.UserStatus,
                 });
-
             }
             return employeesList;
         }
 
         [HttpGet]
         [Route("{employeeId}/GetEmployeeById")]
+        [Authorize(Roles = UserRoles.Employee+","+UserRoles.Admin)]
         public async Task<IActionResult> GetEmployeeById(string employeeId)
         {
+            //Return particular employee details based on his Id
+
             var employee=await this._userManager.Users.Where(x=>x.Id == employeeId).FirstOrDefaultAsync();
             if (employee == null)
             {
@@ -121,8 +127,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{employeeId}/ChangePassword")]
+        [Authorize(Roles = UserRoles.Employee)]
         public async Task<IActionResult> ChangePassword(string employeeId, ChangePasswordModel model)
         {
+            //To update employee password
             if (ModelState.IsValid)
             {
                 var userExist = await this._userManager.FindByIdAsync(employeeId);
@@ -147,8 +155,7 @@ namespace InsuranceBankWebApiProject.Controllers
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
-        {
-            
+        {            
             var user = await this._userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -191,6 +198,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpPut]
         [Route("{employeeId}/UpdateEmployee")]
+        [Authorize(Roles = UserRoles.Employee)]
         public async Task<IActionResult> UpdateEmployee(string employeeId,EmployeeUpdateDto model)
         {
             var employee=await this._userManager.FindByIdAsync(employeeId);
@@ -225,8 +233,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPut]
         [Route("{customerId}/UpdateCustomer")]
+        [Authorize(Roles = UserRoles.Employee+","+UserRoles.Admin)]
         public async Task<IActionResult> UpdateCustomer(string customerId, CustomerUpdateDto model)
         {
+            //To update employee details
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Message = "All Fields Are Required", Status = "Error" });
