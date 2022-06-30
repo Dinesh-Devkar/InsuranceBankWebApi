@@ -32,5 +32,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Customer
         public string CustomerId { get; set; }
         
         public int AgentCode { get; set; }
+        [Required(ErrorMessage = "Number Of Installments Is Required")]
+        public int NumberOfInstallments { get; set; }
     }
 }

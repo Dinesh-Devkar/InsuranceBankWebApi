@@ -139,13 +139,14 @@ namespace InsuranceBankWebApiProject.Controllers
             //Update Password
             if (ModelState.IsValid)
             {
+                //First Check Is User Exists Or Not
                 var userExist = await this._userManager.FindByIdAsync(adminId);
                 if (userExist == null)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User Not Found" });
                 }
-                var result1 = _userManager.PasswordHasher.VerifyHashedPassword(userExist, userExist.PasswordHash, model.OldPassword);
-                if (result1 != PasswordVerificationResult.Success)
+                var verifyPassword = _userManager.PasswordHasher.VerifyHashedPassword(userExist, userExist.PasswordHash, model.OldPassword);
+                if (verifyPassword != PasswordVerificationResult.Success)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Password Given" });
                 }
@@ -163,23 +164,13 @@ namespace InsuranceBankWebApiProject.Controllers
 
         }
 
-        [HttpGet]
-        [Route("GetAllAdmins")]
-        [Authorize(Roles = UserRoles.Admin)]
-
-        public async Task<List<ApplicationUser>> GetAllAdmins()
-        {
-            // Return The List Of All Admins Plus Users For Testing
-            return this._userManager.Users.ToList();
-
-        }
 
         [HttpGet]
         [Route("{adminId}/GetAdminDetails")]
         [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<IActionResult> GetAdminDetails(string adminId)
         {
-            //Method Will Return The Admin Details To See In Profile
+            //Method Will Return The Admin Details To See In Profile as well as Employee
             var admin = await this._userManager.FindByIdAsync(adminId);
             if (admin == null)
             {
@@ -199,8 +190,8 @@ namespace InsuranceBankWebApiProject.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<List<EmployeeGetDto>> GetAllEmployees()
         {
+            //It will return list of all employees including admins aor Admin Dashboard
             List<EmployeeGetDto> employeesList = new List<EmployeeGetDto>();
-            //var employees = this._employeeManager.GetAll().Where(x=>x.UserRoll==UserRoles.Employee);
             var employees = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Employee || x.UserRoll==UserRoles.Admin).ToListAsync();
             foreach (var employee in employees)
             {
@@ -217,57 +208,5 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return employeesList;
         }
-
-        //[HttpPut]
-        //[Route("{agentCode}/UpdateAgent")]
-        //public async Task<IActionResult> UpdateAgent(string agentCode, UpdateAgentDto model)
-        //{
-        //    //Method For Update Agent Details Based On His UniqueAgent Code
-
-        //    var agent = await this._userManager.Users.Where(x => x.UserRoll == UserRoles.Agent && x.AgentCode == agentCode).FirstOrDefaultAsync();
-        //    if (agent == null)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
-        //    }
-        //    if (agent.AgentCode != model.AgentCode)
-        //    {
-        //        var isAgentCodeExists=await this._userManager.Users.Where(x=>x.AgentCode==model.AgentCode).FirstOrDefaultAsync();
-        //        if(isAgentCodeExists != null)
-        //        {
-        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Code Already Exists" });
-        //        }
-               
-        //    }
-        //    Debug.WriteLine(agent.Email);
-        //    Debug.WriteLine(model.Email);
-        //    if (agent.Email != model.Email)
-        //    {
-        //        var isEmailExists = await this._userManager.FindByEmailAsync(model.Email);
-        //        if (isEmailExists != null)
-        //        {
-        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Email Already Taken Use Another Email" }); ;
-        //        }
-        //    }
-        //    Debug.WriteLine(agent.LoginId);
-        //    Debug.WriteLine(model.LoginId);
-        //    if (agent.LoginId != model.LoginId)
-        //    {
-        //        var isLoginIdExists = await this._userManager.Users.Where(x => x.LoginId == model.LoginId).FirstOrDefaultAsync();
-        //        if (isLoginIdExists != null)
-        //        {
-        //            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" }); ;
-        //        }
-        //    }
-        //    agent.AgentCode = model.AgentCode;
-        //    agent.Address = model.Address;
-        //    agent.Qualification = model.Qualification;
-        //    agent.Email = model.Email;
-        //    agent.UserStatus = model.Status;
-        //    agent.LoginId = model.LoginId;
-        //    agent.UserName = model.Name;
-
-        //    await this._userManager.UpdateAsync(agent);
-        //    return this.Ok(new Response { Message = "Data Updated Successfully", Status = "Success" });
-        //}
     }
 }

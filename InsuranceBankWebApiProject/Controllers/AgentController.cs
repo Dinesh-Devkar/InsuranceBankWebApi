@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -41,6 +42,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
+        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<IActionResult> Register([FromBody] AgentAddDto model)
         {
             // Registration For Agent
@@ -48,18 +50,23 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
             }
+
+            //Checking is email already exists
             var agentExist = await this._userManager.FindByEmailAsync(model.Email);
             if (agentExist != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Already Exists" });
             }
             
+            //Checking is loginId already exists login id should be unique for each user
             var loginIdExists = this._userManager.Users.ToList().Find(x=>x.LoginId==model.LoginId);
             Debug.WriteLine("The Login Id Exists : " + loginIdExists);
             if (loginIdExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "LoginId Already Exists Use Another LoginId" });
             }
+
+            //Checking is agentCode exists agentCode should be unique for each agent
             var agentCodeExists= this._userManager.Users.ToList().Find(x => x.AgentCode == int.Parse(model.AgentCode));
             if (agentCodeExists != null)
             {
@@ -145,9 +152,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllAgents")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee)]
         public async Task<List<AgentGetDto>> GetAllAgents()
         {
-            //Will Return The List Of All Admins
+            //Will Return The List Of All Agents
             List<AgentGetDto> agentsList = new List<AgentGetDto>();
             var agents= await this._userManager.Users.Where(x=>x.UserRoll==UserRoles.Agent).ToListAsync();
             foreach (var agent in agents)
@@ -171,6 +179,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetAgentById")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee+","+UserRoles.Agent)]
         public async Task<IActionResult> GetAgentById(string agentId)
         {
             //Will Return The Agent Details For Edit  And See In His Profile By Agent Id
@@ -194,6 +203,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentCode}/GetAgentByCode")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent)]
         public async Task<IActionResult> GetAgentByCode(int agentCode)
         {
             //Will Return The Agent Details For Edit  And See In His Profile By Agent Unique Code
@@ -218,9 +228,11 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetInsuranceAccountsByAgentId")]
+        [Authorize(Roles = UserRoles.Agent)]
         public async Task<IActionResult> GetInsuranceAccountsByAgentId(string agentId)
         {
             //Method Will Return The List Of Insurance Accounts Of Particular Agent Based On His ID
+
             List<InsuranceAccountGetDto> insuranceAccountsList = new List<InsuranceAccountGetDto>();
             var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent==null)
@@ -258,6 +270,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetAllCustomersByAgentId")]
+        [Authorize(Roles = UserRoles.Agent)]
         public async Task<IActionResult> GetAllCustomersByAgentId(string agentId)
         {
             //Method Will Return The List Of Customers  Of Particular Agent Based On His ID
@@ -290,6 +303,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetCommissionRecordsByAgentId")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent)]
         public async Task<IActionResult> GetCommissionRecordsByAgentId(string agentId)
         {
             //Method Will Return The List Of Commission Records  Of Particular Agent Based On His ID
@@ -320,17 +334,17 @@ namespace InsuranceBankWebApiProject.Controllers
       
         [HttpPut]
         [Route("{agentId}/UpdateAgent")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent)]
         public async Task<IActionResult> UpdateAgent(string agentId, UpdateAgentDto model)
         {
-            //Method For Update Agent Details Based On His UniqueAgent Code
+            //Method For Update Agent Details Based On His AgentId
 
             var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Agent Not Found" });
             }
-            Debug.WriteLine(agent.AgentCode);
-            Debug.WriteLine(model.AgentCode);
+
             if (agent.AgentCode != model.AgentCode)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Invalid Agent Code Provided" });
@@ -364,9 +378,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("GetAllCommissionRecords")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee)]
         public async Task<IActionResult> GetAllCommissionRecords()
         {
-            //Will Return The List Of All Commission Records IT Will Used By Admin And Employee
+            //Will Return The List Of All Commission Records It Will Used By Admin And Employee
 
             List<CommissionRecordGetDto> commissions=new List<CommissionRecordGetDto>();
             var commissionRecords = this._commissionRecordManager.GetAll();
@@ -389,8 +404,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("{agentId}/AddCustomer")]
+        [Authorize(Roles = UserRoles.Agent)]
         public async Task<IActionResult> AddCustomer(string agentId,[FromBody] AgentCustomerAddDto model)
         {
+            //Register customer method for agent customer who came via agent
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "All Fields Are Required" });
@@ -454,8 +471,10 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetBalance")]
+        [Authorize(Roles = UserRoles.Agent)]
         public async Task<IActionResult> GetBalance(string agentId)
         {
+            //return the total balance of the agent how much he earn total commission
             var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent == null)
             {
@@ -468,8 +487,11 @@ namespace InsuranceBankWebApiProject.Controllers
         
         [HttpPost]
         [Route("{agentId}/Withdraw")]
+        [Authorize(Roles = UserRoles.Agent)]
         public async Task<IActionResult> Withdraw(string agentId,AgentTransactionDto model)
         {
+            //method to withdraw the agent commission
+
             var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent == null)
             {
@@ -502,8 +524,11 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{agentId}/GetTransactions")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent)]
         public async Task<IActionResult> GetTransactions(string agentId)
         {
+            // it will return the list of particular agent transactions it will use by agent employe and admin
+
             var agent = await this._userManager.FindByIdAsync(agentId);
             if (agent == null)
             {

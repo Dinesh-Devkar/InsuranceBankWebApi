@@ -13,5 +13,7 @@
         public string MaturityDate { get; set; }
         public string CustomerName { get; set; }
         public string CustomerId { get; set; }
+        public int NumberOfInstallments { get; set; }
+        public int PendingInstallments { get; set; }
     }
 }
