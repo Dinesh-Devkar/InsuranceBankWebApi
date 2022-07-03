@@ -21,7 +21,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("AddState")]
-        [Authorize(UserRoles.Admin)]
+        [Authorize(Roles=UserRoles.Admin)]
         public async Task<IActionResult> AddState([FromBody] StateAddDto model)
         {
             //To add a new State
@@ -74,10 +74,18 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpGet]
         [Route("GetAllStates")]
+        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee+","+UserRoles.Agent)]
         public async Task<List<State>> GetAllStates()
         {
             //Return a list of all states
             return this._stateManager.GetAll();
+        }
+        [HttpGet]
+        [Route("GetAllActiveStates")]
+        public async Task<List<State>> GetAllActiveStates()
+        {
+            //Return a list of all the active states
+            return this._stateManager.GetAll().Where(x=>x.Status=="Active").ToList();
         }
     }
 }
