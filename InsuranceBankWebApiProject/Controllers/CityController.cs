@@ -69,7 +69,6 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "City Not Found" });
 
-
         }
 
         [HttpGet]
@@ -90,7 +89,6 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{stateName}/GetCitiesByState")]
-        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Employee + "," + UserRoles.Agent + "," + UserRoles.Customer)]
         public async Task<IActionResult> GetCitiesByState(string stateName)
         {
             //return a list of cities by state name   

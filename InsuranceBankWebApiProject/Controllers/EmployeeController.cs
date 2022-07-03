@@ -33,7 +33,7 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpPost]
         [Route("Register")]
-        [Authorize(Roles =UserRoles.Employee)]
+        [Authorize(Roles =UserRoles.Employee+","+UserRoles.Admin)]
         public async Task<IActionResult> Register([FromBody] EmployeeAddDto model)
         {
             if (!ModelState.IsValid)
@@ -198,7 +198,7 @@ namespace InsuranceBankWebApiProject.Controllers
 
         [HttpPut]
         [Route("{employeeId}/UpdateEmployee")]
-        [Authorize(Roles = UserRoles.Employee)]
+        [Authorize(Roles = UserRoles.Employee+","+UserRoles.Admin)]
         public async Task<IActionResult> UpdateEmployee(string employeeId,EmployeeUpdateDto model)
         {
             var employee=await this._userManager.FindByIdAsync(employeeId);
