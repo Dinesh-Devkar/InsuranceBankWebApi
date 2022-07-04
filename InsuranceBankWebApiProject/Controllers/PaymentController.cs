@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Stripe;
+using Stripe.Checkout;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -18,11 +21,14 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly IAllRepository<InsuranceAccount> _insuranceAccountManager;
         private readonly IAllRepository<Payment> _paymentManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        public PaymentController(BankInsuranceDbContext insuranceDbContext,UserManager<ApplicationUser> userManager)
+        private readonly StripeSettings _stripeSettings;
+        public PaymentController(BankInsuranceDbContext insuranceDbContext,UserManager<ApplicationUser> userManager, IOptions<StripeSettings> stripeSettings)
         {
             this._paymentManager=new AllRepository<Payment>(insuranceDbContext);
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(insuranceDbContext);
             this._userManager = userManager;
+            _stripeSettings = stripeSettings.Value;
+            //StripeConfiguration.ApiKey = "sk_test_51LHTG0SBgKTZYyeaxtvjqK7VCYUkHhXom6lm5mHCzF2Hd6CbZqO2uHDXcRlnt2ruBxFNjKSvt0HnRN0nAAGtcSpB00gVhmWqrV";
         }
 
         [HttpGet]
@@ -77,6 +83,102 @@ namespace InsuranceBankWebApiProject.Controllers
                 }) ;
             }
             return this.Ok(paymentsList);
+        }
+
+        [HttpGet]
+        [Route("GetProducts")]
+        public async Task<IActionResult> GetProducts()
+        {
+            //StripeConfiguration.ApiKey = "sk_test_51LHTG0SBgKTZYyeaxtvjqK7VCYUkHhXom6lm5mHCzF2Hd6CbZqO2uHDXcRlnt2ruBxFNjKSvt0HnRN0nAAGtcSpB00gVhmWqrV";
+
+            var options = new ProductListOptions
+            {
+                Limit = 3,
+            };
+            var service = new ProductService();
+            StripeList<Product> products = service.List(
+              options);
+
+            return this.Ok(products);
+        }
+        [HttpPost("create-checkout-session")]
+        public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest req)
+        {
+            var options = new SessionCreateOptions
+            {
+                SuccessUrl = req.SuccessUrl, // "http://localhost:4200/paymentsuccess",
+                CancelUrl = req.FailureUrl, //  "http://localhost:4200/paymentfailure",
+                PaymentMethodTypes = new List<string>
+                {
+                    "card",
+                },
+                Mode = "subscription",
+                LineItems = new List<SessionLineItemOptions>
+                {
+                    new SessionLineItemOptions
+                    {
+                        Price = req.PriceId,
+                        Quantity = 1,
+                    },
+                },
+            };
+
+            var service = new SessionService();
+            service.Create(options);
+            try
+            {
+                var session = await service.CreateAsync(options);
+                return Ok(new CreateCheckoutSessionResponse
+                {
+                    SessionId = session.Id,
+                    PublicKey = _stripeSettings.PublicKey
+                });
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorMessage = new ErrorMessage
+                    {
+                        Message = e.StripeError.Message,
+                    }
+                });
+            }
+        }
+
+        //**WARNING** You want to protect this api and you want to get the customerId from the database.
+        //we will take care of this in the next video
+        [HttpPost("customer-portal")]
+        public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
+        {
+            try
+            {
+                var options = new Stripe.BillingPortal.SessionCreateOptions
+                {
+                    Customer = "cus_LzkBvUpcsuAApY",
+                    ReturnUrl = req.ReturnUrl,
+                };
+                var service = new Stripe.BillingPortal.SessionService();
+                var session = await service.CreateAsync(options);
+
+                return Ok(new
+                {
+                    url = session.Url
+                });
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorMessage = new ErrorMessage
+                    {
+                        Message = e.StripeError.Message,
+                    }
+                });
+            }
+
         }
     }
 }

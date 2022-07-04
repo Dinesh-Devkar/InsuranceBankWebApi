@@ -22,3 +22,15 @@ D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
 D:\MVCPractice\Backup\BankEnsuranceSolution\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.deps.json
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.dll
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\bin\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.AssemblyReference.cache
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfoInputs.cache
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.AssemblyInfo.cs
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.csproj.CoreCompileInputs.cache
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.dll
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\refint\EnsuranceProjectEntityLib.dll
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\EnsuranceProjectEntityLib.pdb
+C:\Swabhav\DOTNET\InsuranceBankWebApi\EnsuranceProjectEntityLib\obj\Debug\net6.0\ref\EnsuranceProjectEntityLib.dll

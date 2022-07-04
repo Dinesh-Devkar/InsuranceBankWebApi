@@ -53,7 +53,6 @@ namespace InsuranceBankWebApiProject.Controllers
         }
         [HttpGet]
         [Route("{userId}/GetAllInsuranceTypesForAdmin")]
-        [Authorize(Roles =UserRoles.Admin+","+UserRoles.Employee)]
         public async Task<IActionResult> GetAllInsuranceTypesForAdmin(string userId)
         {
             //return a list of all insurance type including active and inactive
