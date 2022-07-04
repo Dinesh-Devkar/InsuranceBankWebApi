@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj": {}
+    "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj": {}
   },
   "projects": {
-    "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj": {
+    "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj",
+        "projectUniqueName": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj",
         "projectName": "EnsuranceProjectEntityLib",
-        "projectPath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj",
-        "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\obj\\",
+        "projectPath": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -64,25 +60,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj": {
+    "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj",
+        "projectUniqueName": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj",
         "projectName": "EnsuranceProjectLib",
-        "projectPath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj",
-        "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectLib\\obj\\",
+        "projectPath": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectLib\\EnsuranceProjectLib.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectLib\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -96,8 +88,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj": {
-                "projectPath": "D:\\MVCPractice\\Backup\\BankEnsuranceSolution\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj"
+              "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj": {
+                "projectPath": "C:\\Swabhav\\DOTNET\\InsuranceBankWebApi\\EnsuranceProjectEntityLib\\EnsuranceProjectEntityLib.csproj"
               }
             }
           }
@@ -158,7 +150,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     }
