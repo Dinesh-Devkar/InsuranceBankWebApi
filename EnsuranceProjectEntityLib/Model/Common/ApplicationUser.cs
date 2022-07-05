@@ -25,6 +25,7 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public string? Qualification { get; set; }
         public double? Balance { get; set; }
 
+        public string? CustomerStripeId { get; set; }
         public List<CustomerDocument> Documents { get; set; }
     }
 }

@@ -29,6 +29,7 @@ builder.Services.AddTransient<IBankInsuranceDbContext, BankInsuranceDbContext>()
 builder.Services.AddTransient(typeof(IAllRepository<>), typeof(AllRepository<>));
 builder.Services.AddDbContext<BankInsuranceDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDbContextConnectionString")));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BankInsuranceDbContext>()
     .AddDefaultTokenProviders();
@@ -76,9 +77,13 @@ app.UseCors(
                     builder.AllowAnyMethod();
                     builder.AllowAnyHeader();
                 });
+app.Use((context, next) =>
+{
+    context.Request.EnableBuffering();
+    return next();
+});
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -6,5 +6,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Payment
     {
         [Required]
         public string ReturnUrl { get; set; }
+        [Required]
+        public string CustomerId { get; set; }
     }
 }

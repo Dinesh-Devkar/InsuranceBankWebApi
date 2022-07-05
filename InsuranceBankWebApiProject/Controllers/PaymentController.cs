@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using EnsuranceProjectLib.Repository.AdminRepo;
 using InsuranceBankWebApiProject.DtoClasses.Common;
 using InsuranceBankWebApiProject.DtoClasses.Payment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -22,12 +25,14 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly IAllRepository<Payment> _paymentManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly StripeSettings _stripeSettings;
+        private readonly IAllRepository<Subscriber> _subscriberManager;
         public PaymentController(BankInsuranceDbContext insuranceDbContext,UserManager<ApplicationUser> userManager, IOptions<StripeSettings> stripeSettings)
         {
             this._paymentManager=new AllRepository<Payment>(insuranceDbContext);
             this._insuranceAccountManager=new AllRepository<InsuranceAccount>(insuranceDbContext);
             this._userManager = userManager;
             _stripeSettings = stripeSettings.Value;
+            this._subscriberManager=new AllRepository<Subscriber>(insuranceDbContext);
             //StripeConfiguration.ApiKey = "sk_test_51LHTG0SBgKTZYyeaxtvjqK7VCYUkHhXom6lm5mHCzF2Hd6CbZqO2uHDXcRlnt2ruBxFNjKSvt0HnRN0nAAGtcSpB00gVhmWqrV";
         }
 
@@ -149,14 +154,26 @@ namespace InsuranceBankWebApiProject.Controllers
 
         //**WARNING** You want to protect this api and you want to get the customerId from the database.
         //we will take care of this in the next video
+        [Authorize]
         [HttpPost("customer-portal")]
         public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
         {
+           // ClaimsPrincipal principal = HttpContext.User as ClaimsPrincipal;
+            //ApplicationUser principal = HttpContext.User. as ApplicationUser;
+            //var claim = principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
+            var userFromDb = await _userManager.FindByIdAsync(req.CustomerId);
+
+            if (userFromDb == null)
+            {
+                return BadRequest();
+            }
+
             try
             {
                 var options = new Stripe.BillingPortal.SessionCreateOptions
                 {
-                    Customer = "cus_LzkBvUpcsuAApY",
+                    //Customer = "cus_LzkBvUpcsuAApY",
+                    Customer = userFromDb.CustomerStripeId,
                     ReturnUrl = req.ReturnUrl,
                 };
                 var service = new Stripe.BillingPortal.SessionService();
@@ -180,5 +197,119 @@ namespace InsuranceBankWebApiProject.Controllers
             }
 
         }
+        [HttpPost]
+        [Route("Webhook")]
+        public async Task<IActionResult> WebHook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            try
+            {
+                var stripeEvent = EventUtility.ConstructEvent(
+                 json,
+                 Request.Headers["Stripe-Signature"],
+                 _stripeSettings.WHSecret
+               );
+
+                // Handle the event
+                if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
+                    //Do stuff
+                    await addSubscriptionToDb(subscription);
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
+                {
+                    var session = stripeEvent.Data.Object as Stripe.Subscription;
+
+                    // Update Subsription
+                    await updateSubscription(session);
+                }
+                else if (stripeEvent.Type == Events.CustomerCreated)
+                {
+                    var customer = stripeEvent.Data.Object as Stripe.Customer;
+                    //Do Stuff
+                    await addCustomerIdToUser(customer);
+                }
+                // ... handle other event types
+                else
+                {
+                    // Unexpected event type
+                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                }
+                return Ok();
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest();
+            }
+        }
+
+        private async Task addCustomerIdToUser(Stripe.Customer customer)
+        {
+            try
+            {
+                var userFromDb = await _userManager.FindByEmailAsync(customer.Email);
+
+                if (userFromDb != null)
+                {
+                    userFromDb.CustomerStripeId = customer.Id;
+                    await _userManager.UpdateAsync(userFromDb);
+                    Console.WriteLine("Customer Id added to user ");
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine("Unable to add customer id to user");
+                Console.WriteLine(ex);
+            }
+        }
+
+        private async Task addSubscriptionToDb(Subscription subscription)
+        {
+            try
+            {
+                var subscriber = new Subscriber
+                {
+
+                    CustomerId = subscription.CustomerId,
+                    Status = "Active",
+                    CurrentEndDate = "Hello"   //subscription.CurrentPeriodEnd.ToShortDateString()
+                };
+                await this._subscriberManager.Add(subscriber);
+
+                //You can send the new subscriber an email welcoming the new subscriber
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine("Unable to add new subscriber to Database");
+                Console.WriteLine(ex.Message);
+            }
+        }
+        private async Task updateSubscription(Subscription subscription)
+        {
+            try
+            {
+                var subscriptionFromDb =  this._subscriberManager.GetAll().Where(x=>x.Id==subscription.Id).FirstOrDefault();
+                if (subscriptionFromDb != null)
+                {
+                    subscriptionFromDb.Status = subscription.Status;
+                    subscriptionFromDb.CurrentEndDate = subscription.CurrentPeriodEnd.ToShortDateString();
+                    await this._subscriberManager.Update(subscriptionFromDb);
+                   // Console.WriteLine("Subscription Updated");
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                Console.WriteLine("Unable to update subscription");
+
+            }
+
+        }
+
     }
 }

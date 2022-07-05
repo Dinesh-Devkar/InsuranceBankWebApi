@@ -101,7 +101,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 await this._userManager.AddToRoleAsync(customer, UserRoles.Customer);
             }
-
+            
             return this.Ok(new Response { Message = "Customer Created Successfully", Status = "Success" });
         }
 
