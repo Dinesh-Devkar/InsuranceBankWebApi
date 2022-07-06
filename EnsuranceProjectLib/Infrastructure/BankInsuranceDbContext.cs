@@ -49,6 +49,7 @@ namespace EnsuranceProjectLib.Infrastructure
         public DbSet<AgentTransaction> AgentTransactions { get; set; }
 
         public DbSet<Subscriber> Subscribers { get; set; }
+        public DbSet<StripePayment> StripePayments { get; set; }
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer(@"server=.\sqlexpress;database=BankInsurance;trusted_connection=true");

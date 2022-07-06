@@ -26,6 +26,7 @@ namespace InsuranceBankWebApiProject.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly StripeSettings _stripeSettings;
         private readonly IAllRepository<Subscriber> _subscriberManager;
+        private readonly IAllRepository<StripePayment> _stripePaymentManager;
         public PaymentController(BankInsuranceDbContext insuranceDbContext,UserManager<ApplicationUser> userManager, IOptions<StripeSettings> stripeSettings)
         {
             this._paymentManager=new AllRepository<Payment>(insuranceDbContext);
@@ -33,6 +34,7 @@ namespace InsuranceBankWebApiProject.Controllers
             this._userManager = userManager;
             _stripeSettings = stripeSettings.Value;
             this._subscriberManager=new AllRepository<Subscriber>(insuranceDbContext);
+            this._stripePaymentManager = new AllRepository<StripePayment>(insuranceDbContext);
             //StripeConfiguration.ApiKey = "sk_test_51LHTG0SBgKTZYyeaxtvjqK7VCYUkHhXom6lm5mHCzF2Hd6CbZqO2uHDXcRlnt2ruBxFNjKSvt0HnRN0nAAGtcSpB00gVhmWqrV";
         }
 
@@ -215,37 +217,43 @@ namespace InsuranceBankWebApiProject.Controllers
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
                     //Do stuff
-                    await addSubscriptionToDb(subscription);
+                    
+                    await AddSubscriptionToDb(subscription);
                 }
                 else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
                 {
                     var session = stripeEvent.Data.Object as Stripe.Subscription;
 
                     // Update Subsription
-                    await updateSubscription(session);
+                    await UpdateSubscription(session);
                 }
                 else if (stripeEvent.Type == Events.CustomerCreated)
                 {
                     var customer = stripeEvent.Data.Object as Stripe.Customer;
                     //Do Stuff
-                    await addCustomerIdToUser(customer);
+                    await AddCustomerIdToUser(customer);
                 }
-                // ... handle other event types
+               
+                else if (stripeEvent.Type == Events.PaymentIntentCreated)
+                {
+                    var payment = stripeEvent.Data.Object as Stripe.PaymentIntent;
+                    await AddPaymentToDb(payment);
+                }
                 else
                 {
                     // Unexpected event type
-                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                    Debug.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
                 }
                 return Ok();
             }
             catch (StripeException e)
             {
-                Console.WriteLine(e.StripeError.Message);
+                Debug.WriteLine(e.StripeError.Message);
                 return BadRequest();
             }
         }
 
-        private async Task addCustomerIdToUser(Stripe.Customer customer)
+        private async Task AddCustomerIdToUser(Stripe.Customer customer)
         {
             try
             {
@@ -253,45 +261,63 @@ namespace InsuranceBankWebApiProject.Controllers
 
                 if (userFromDb != null)
                 {
+                    
                     userFromDb.CustomerStripeId = customer.Id;
                     await _userManager.UpdateAsync(userFromDb);
-                    Console.WriteLine("Customer Id added to user ");
+                    Debug.WriteLine("Customer Id added to user ");
                 }
 
             }
             catch (System.Exception ex)
             {
-                Console.WriteLine("Unable to add customer id to user");
-                Console.WriteLine(ex);
+                Debug.WriteLine("Unable to add customer id to user");
+                Debug.WriteLine(ex);
             }
         }
 
-        private async Task addSubscriptionToDb(Subscription subscription)
+        private async Task AddSubscriptionToDb(Subscription subscription)
         {
-            try
+           try
             {
                 var subscriber = new Subscriber
                 {
-
+                    SubscriptionId=subscription.Id,
                     CustomerId = subscription.CustomerId,
                     Status = "Active",
-                    CurrentEndDate = "Hello"   //subscription.CurrentPeriodEnd.ToShortDateString()
+                    CurrentEndDate = subscription.CurrentPeriodEnd.ToShortDateString()
                 };
                 await this._subscriberManager.Add(subscriber);
-
-                //You can send the new subscriber an email welcoming the new subscriber
             }
             catch (System.Exception ex)
             {
-                Console.WriteLine("Unable to add new subscriber to Database");
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine("Unable to add new subscriber to Database");
+                Debug.WriteLine(ex.Message);
             }
         }
-        private async Task updateSubscription(Subscription subscription)
+
+        private async Task AddPaymentToDb(PaymentIntent payment)
         {
             try
             {
-                var subscriptionFromDb =  this._subscriberManager.GetAll().Where(x=>x.Id==subscription.Id).FirstOrDefault();
+                var stripePayment = new StripePayment()
+                {
+                    StripeCustomerId = payment.CustomerId,
+                    StripePaymentId = payment.Id
+                };
+                await this._stripePaymentManager.Add(stripePayment);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.WriteLine("Unable to add new subscriber to Database");
+                Debug.WriteLine(ex.Message);
+            }
+        }
+        private async Task UpdateSubscription(Subscription subscription)
+        {
+           
+            try
+            {
+                var subscriptionFromDb =  this._subscriberManager.GetAll().Where(x=>x.SubscriptionId==subscription.Id).FirstOrDefault();
                 if (subscriptionFromDb != null)
                 {
                     subscriptionFromDb.Status = subscription.Status;
@@ -303,9 +329,9 @@ namespace InsuranceBankWebApiProject.Controllers
             }
             catch (System.Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
 
-                Console.WriteLine("Unable to update subscription");
+                Debug.WriteLine("Unable to update subscription");
 
             }
 

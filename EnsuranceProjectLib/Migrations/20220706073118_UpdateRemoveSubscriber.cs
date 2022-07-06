@@ -4,7 +4,7 @@
 
 namespace EnsuranceProjectLib.Migrations
 {
-    public partial class UpdateSubscriberTable : Migration
+    public partial class UpdateRemoveSubscriber : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

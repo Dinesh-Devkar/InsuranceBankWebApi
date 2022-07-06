@@ -16,5 +16,6 @@ namespace EnsuranceProjectEntityLib.Model.Common
         public string PaymentStatus { get; set; }
         public string CustomerId { get; set; }
         public string InsuranceAccountNumber { get; set; }
+        public string? StripePaymentId { get; set; }
     }
 }

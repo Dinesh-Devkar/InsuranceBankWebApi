@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace EnsuranceProjectEntityLib.Model.Common
 {
-    public class Subscriber
+    public class StripePayment
     {
         public int Id { get; set; }
-        public string CustomerId { get; set; }
-        public string Status { get; set; }
-        public string  CurrentEndDate { get; set; }
-        public string SubscriptionId { get; set; }
+        public string StripeCustomerId { get; set; }
+        public string StripePaymentId { get; set; }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    [Migration("20220705082412_UpdateSubscriberTable")]
-    partial class UpdateSubscriberTable
+    [Migration("20220706093547_UpdatePaymenttbl")]
+    partial class UpdatePaymenttbl
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -286,6 +286,10 @@ namespace EnsuranceProjectLib.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("StripePaymentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Payments");
@@ -293,8 +297,11 @@ namespace EnsuranceProjectLib.Migrations
 
             modelBuilder.Entity("EnsuranceProjectEntityLib.Model.Common.Subscriber", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("CurrentEndDate")
                         .IsRequired()
@@ -305,6 +312,10 @@ namespace EnsuranceProjectLib.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubscriptionId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

@@ -80,7 +80,7 @@ app.UseCors(
 app.Use((context, next) =>
 {
     context.Request.EnableBuffering();
-    return next();
+     return next();
 });
 app.UseAuthentication();
 app.UseAuthorization();

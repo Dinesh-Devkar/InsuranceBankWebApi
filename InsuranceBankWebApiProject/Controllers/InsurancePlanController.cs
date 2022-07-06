@@ -7,6 +7,7 @@ using InsuranceBankWebApiProject.DtoClasses.Insurance;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Diagnostics;
 
 namespace InsuranceBankWebApiProject.Controllers
@@ -91,6 +92,25 @@ namespace InsuranceBankWebApiProject.Controllers
                 ProfitRatio = model.ProfitRatio,
                 Status = model.Status
             });
+            var options = new ProductCreateOptions
+            {
+                Name = model.InsurancePlanName,
+                
+            };
+            var service = new ProductService();
+            var product=service.Create(options);
+            var optionPrice = new PriceCreateOptions
+            {
+                UnitAmount = 12000,
+                Currency = "usd",
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = "month",
+                },
+                Product = product.Id,
+            };
+            var servicePrice = new PriceService();
+            servicePrice.Create(optionPrice);
             return this.Ok(new Response() { Status = "Success", Message = "InsurancePlan Added Successfully" });
         }
         [HttpGet]
