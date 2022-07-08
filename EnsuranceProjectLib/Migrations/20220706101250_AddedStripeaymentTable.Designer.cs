@@ -4,6 +4,7 @@ using EnsuranceProjectLib.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnsuranceProjectLib.Migrations
 {
     [DbContext(typeof(BankInsuranceDbContext))]
-    partial class BankInsuranceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220706101250_AddedStripeaymentTable")]
+    partial class AddedStripeaymentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -531,14 +533,6 @@ namespace EnsuranceProjectLib.Migrations
 
                     b.Property<int>("MinimumYears")
                         .HasColumnType("int");
-
-                    b.Property<string>("PriceId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProductId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProfitRatio")
                         .HasColumnType("int");

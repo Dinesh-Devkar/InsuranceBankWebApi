@@ -26,5 +26,7 @@ namespace InsuranceBankWebApiProject.DtoClasses.Insurance
         public int ProfitRatio { get; set; }
         
         public string Status { get; set; }
+        public string ProductId { get; set; }
+        public string PriceId { get; set; }
     }
 }

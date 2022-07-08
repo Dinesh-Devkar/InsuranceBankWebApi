@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace EnsuranceProjectEntityLib.Model.Common
 {
-    public class StripeSettings
+    public class StripePayment
     {
-        public string PublicKey { get; set; }
-        public string WHSecret { get; set; }
+        public int Id { get; set; }
+        public string StripeCustomerId { get; set; }
+        public string StripePaymentId { get; set; }
     }
 }

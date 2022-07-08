@@ -20,5 +20,7 @@ namespace EnsuranceProjectEntityLib.Model.Insurance
         public int MaximumInvestAmt { get; set; }
         public int ProfitRatio { get; set; }
         public string Status { get; set; }
+        public string ProductId { get; set; }
+        public string PriceId { get; set; }
     }
 }

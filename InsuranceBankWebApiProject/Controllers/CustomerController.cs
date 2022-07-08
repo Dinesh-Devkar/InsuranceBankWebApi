@@ -16,6 +16,7 @@ using System.Transactions;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using InsuranceBankWebApiProject.DtoClasses.Payment;
+using Stripe;
 
 namespace InsuranceBankWebApiProject.Controllers
 {
@@ -101,7 +102,7 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 await this._userManager.AddToRoleAsync(customer, UserRoles.Customer);
             }
-
+            
             return this.Ok(new Response { Message = "Customer Created Successfully", Status = "Success" });
         }
 
@@ -659,6 +660,15 @@ namespace InsuranceBankWebApiProject.Controllers
             account.PolicyStatus = PolicyStatus.Requested;
             await this._insuranceAccountManager.Update(account);
             return this.Ok(new Response { Message = "Your Insurance Policy Claimed Is Requested Successfully You Will Receive A Response In Next 24 Hours", Status = "Success" });
+        }
+
+        [HttpGet]
+        [Route("GetStripeCustomerById")]
+        public async Task<IActionResult> GetStripeCustomerById(string customerId)
+        {
+            var service = new CustomerService();
+            service.Get(customerId);
+            return this.Ok(service.Get(customerId));
         }
     }
 }
