@@ -78,6 +78,22 @@ namespace InsuranceBankWebApiProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "InsurancePlan Already Exists" });
             }
+            
+            var options = new ProductCreateOptions
+            {
+                Name = model.InsurancePlanName,
+                
+            };
+            var service = new ProductService();
+            var product=service.Create(options);
+            var optionPrice = new PriceCreateOptions
+            {
+                UnitAmount = (model.MinimumInvestAmt/model.MinimumYears)*100,
+                Currency = "inr",             
+                Product = product.Id,
+            };
+            var servicePrice = new PriceService();
+            var price=servicePrice.Create(optionPrice);
             await this._insurancePlanManager.Add(new InsurancePlan()
             {
                 InsurancePlanName = model.InsurancePlanName,
@@ -90,27 +106,10 @@ namespace InsuranceBankWebApiProject.Controllers
                 MaximumYears = model.MaximumYears,
                 MinimumYears = model.MinimumYears,
                 ProfitRatio = model.ProfitRatio,
-                Status = model.Status
+                Status = model.Status,
+                PriceId=price.Id,
+                ProductId=price.ProductId
             });
-            var options = new ProductCreateOptions
-            {
-                Name = model.InsurancePlanName,
-                
-            };
-            var service = new ProductService();
-            var product=service.Create(options);
-            var optionPrice = new PriceCreateOptions
-            {
-                UnitAmount = 12000,
-                Currency = "usd",
-                Recurring = new PriceRecurringOptions
-                {
-                    Interval = "month",
-                },
-                Product = product.Id,
-            };
-            var servicePrice = new PriceService();
-            servicePrice.Create(optionPrice);
             return this.Ok(new Response() { Status = "Success", Message = "InsurancePlan Added Successfully" });
         }
         [HttpGet]
@@ -136,7 +135,9 @@ namespace InsuranceBankWebApiProject.Controllers
                 MinimumInvestAmt = insurancePlan.MinimumInvestAmt,
                 MinimumYears = insurancePlan.MinimumYears,
                 ProfitRatio = insurancePlan.ProfitRatio,
-                Id=insurancePlan.Id
+                Id=insurancePlan.Id,
+               ProductId=insurancePlan.ProductId,
+               PriceId=insurancePlan.PriceId
             });
         }
         [HttpPut]

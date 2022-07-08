@@ -119,7 +119,7 @@ namespace InsuranceBankWebApiProject.Controllers
                 {
                     "card",
                 },
-                Mode = "subscription",
+                Mode = "payment",
                 LineItems = new List<SessionLineItemOptions>
                 {
                     new SessionLineItemOptions
@@ -234,7 +234,7 @@ namespace InsuranceBankWebApiProject.Controllers
                     await AddCustomerIdToUser(customer);
                 }
                
-                else if (stripeEvent.Type == Events.PaymentIntentCreated)
+                else if (stripeEvent.Type == Events.PaymentIntentSucceeded)
                 {
                     var payment = stripeEvent.Data.Object as Stripe.PaymentIntent;
                     await AddPaymentToDb(payment);
